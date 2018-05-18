@@ -7,7 +7,7 @@ options(device = "CairoWin")
 
 
 
-#Data import
+# Data import
 survey_df <- read_csv("Citizen initiative.csv")
 survey_df
 
@@ -32,7 +32,7 @@ survey_df$date <- ymd_hms(survey_df$date)
 survey_df <- survey_df %>% 
                 filter(date > "2018-04-27 20:00:00")
 
-#grouping preprocessing
+# Grouping preprocessing
 lut_group_eng <- c("Citizen with no active implication in a local citizen's initiative, social project or social organization." = "Citizen_not_active",
                    "Active member of a local citizen's initiative, social project or social organization." = "Active_member",
                    "Citizen with casual volonteering for a local citizen's initiative, social project or social organization." = "Citizen_casual_vol")
@@ -50,24 +50,24 @@ survey_df$grouping_eng <- lut_group_eng[survey_df$grouping_eng]
 survey_df$grouping_nl <- lut_group_nl[survey_df$grouping_nl]
 survey_df$grouping_fr <- lut_group_fr[survey_df$grouping_fr]
 
-#entrepreuneurs interest preprocessing
-lut_int_eng <- c("I am not interested in joining a civic crowdfunding platform." = "Not_interested",
-                 "I could be interested to join a civic crowdfunding platform." = "Could_be_interested",
-                 "I am ready to join a civic crowdfunding platform." = "Is_ready")
+# Entrepreuneurs interest preprocessing
+lut_e_int_eng <- c("I am not interested in joining a civic crowdfunding platform." = "Not_interested",
+                   "I could be interested to join a civic crowdfunding platform." = "Could_be_interested",
+                   "I am ready to join a civic crowdfunding platform." = "Is_ready")
 
-lut_int_nl <- c("Ik ben niet geinteresseerd bij het toetreden van een ‘civic crowdfunding’ platform." = "Not_interested",
-                "Ik zou geinteresseerd kunnen zijn in het toetreden van een ‘civic crowdfunding’ platform." = "Could_be_interested",
-                "Ik wil deel uitmaken van een ‘civic crowdfunding’ platform." = "Is_ready")
+lut_e_int_nl <- c("Ik ben niet geinteresseerd bij het toetreden van een ‘civic crowdfunding’ platform." = "Not_interested",
+                  "Ik zou geinteresseerd kunnen zijn in het toetreden van een ‘civic crowdfunding’ platform." = "Could_be_interested",
+                  "Ik wil deel uitmaken van een ‘civic crowdfunding’ platform." = "Is_ready")
 
-lut_int_fr <- c("Je ne suis pas intéressé.e par l'adhésion à une plateforme de crowdfunding citoyen." = "Not_interested",
-                "Je pourrais être intéressé.e par l'adhésion à une plateforme de crowdfunding citoyen." = "Could_be_interested",
-                "Je suis prêt.e à rejoindre une plateforme de crowdfunding citoyen." = "Is_ready")
+lut_e_int_fr <- c("Je ne suis pas intéressé.e par l'adhésion à une plateforme de crowdfunding citoyen." = "Not_interested",
+                  "Je pourrais être intéressé.e par l'adhésion à une plateforme de crowdfunding citoyen." = "Could_be_interested",
+                  "Je suis prêt.e à rejoindre une plateforme de crowdfunding citoyen." = "Is_ready")
 
-survey_df$e_interest_eng <- lut_int_eng[survey_df$e_interest_eng]
-survey_df$e_interest_nl <- lut_int_nl[survey_df$e_interest_nl]
-survey_df$e_interest_fr <- lut_int_fr[survey_df$e_interest_fr]
+survey_df$e_interest_eng <- lut_e_int_eng[survey_df$e_interest_eng]
+survey_df$e_interest_nl <- lut_e_int_nl[survey_df$e_interest_nl]
+survey_df$e_interest_fr <- lut_e_int_fr[survey_df$e_interest_fr]
 
-#Likert scales preprocessing
+# Likert scale questions preprocessing
 unique(survey_df$e_p1_eng)
 
 lut_likert_nl <- c("Helemaal niet akkoord" = "Strongly disagree",
@@ -82,7 +82,6 @@ lut_likert_fr <- c("Pas du tout d'accord" = "Strongly disagree",
                    "D'accord" = "Agree",
                    "Tout à fait d'accord" = "Strongly agree")
 
-#Likert scale questions preprocessing
 survey_df[] <- lapply(colnames(survey_df),
                       function(x) {
                         y <- survey_df[[x]]
@@ -101,5 +100,143 @@ survey_df[] <- lapply(colnames(survey_df),
                         return(y)
                       })
 
+# Citizen interest preprocessing
+lut_c_int_eng <- c("I am not interested in citizen's initiatives." = "Not_interested",
+                   "I could be interested to fund a citizen's initiative." = "Could_be_interested_Fund",
+                   "I could be interested to volunteer for a citizen's initiative." = "Could_be_interested_Vol",
+                   "I am ready to fund a citizen's initiative." = "Is_ready_Fund",
+                   "I am ready to volunteer for a citizen's initiative." = "Is_ready_Vol")
 
+lut_c_int_nl <- c("Ik ben niet geinteresseerd door burgerinitiatieven" = "Not_interested",
+                  "Ik zou eventueel geinteresseerd kunnen zijn door het financieel te ondersteunen van burgerinitiatieven" = "Could_be_interested_Fund",
+                  "Ik zou eventueel geinteresseerd zijn om een vrijwillige bijdrage te leveren aan een burgerinitiatief" = "Could_be_interested_Vol",
+                  "Ik ben klaar om burgerinitiatieven te financieren" = "Is_ready_Fund",
+                  "Ik ben klaar om vrijwilig mee te draaien in een burgerinitiatief" = "Is_ready_Vol")
+
+lut_c_int_fr <- c("Je ne suis pas intéressé.e par les initiatives citoyennes" = "Not_interested",
+                  "Je pourrais être éventuellement intéressé.e par le financement d'une initiative citoyenne" = "Could_be_interested_Fund",
+                  "Je pourrais être éventuellement intéressé.e par une contribution en tant que volontaire dans une initiative citoyenne" = "Could_be_interested_Vol",
+                  "Je suis prêt.e à financer une initiative citoyenne" = "Is_ready_Fund",
+                  "Je suis prêt.e à contribuer en tant que volontaire dans une initiative citoyenne" = "Is_ready_Vol")
+
+survey_df$c_interest_eng <- lut_c_int_eng[survey_df$c_interest_eng]
+survey_df$c_interest_nl <- lut_c_int_nl[survey_df$c_interest_nl]
+survey_df$c_interest_fr <- lut_c_int_fr[survey_df$c_interest_fr]
+
+# Citizen already investing question preprocessing
+lut_c_invest_eng <- c("0€" = "0",
+                      "1 - 99€ /year" = "1_99",
+                      "100 - 199€ /year" = "100_199",
+                      "200 - 499€ /year" = "200_499",
+                      "500€ + /year" = "500_plus")
+
+lut_c_invest_nl <- c("0€" = "0",
+                     "1 - 99€ /jaar" = "1_99",
+                     "100 - 199€ /jaar" = "100_199",
+                     "200 - 499€ /jaar" = "200_499",
+                     "500€ + /jaar" = "500_plus")
+
+lut_c_invest_fr <- c("0€" = "0",
+                     "1 - 99€ /an" = "1_99",
+                     "100 - 199€ /an" = "100_199",
+                     "200 - 499€ /an" = "200_499",
+                     "500€ + /an" = "500_plus")
+
+survey_df$c_invest_eng <- lut_c_invest_eng[survey_df$c_invest_eng]
+survey_df$c_invest_nl <- lut_c_invest_nl[survey_df$c_invest_nl]
+survey_df$c_invest_fr <- lut_c_invest_fr[survey_df$c_invest_fr]
+
+# Contrib neighb question preprocessing
+survey_df$ec_neighb_nl <- lut_likert_nl[survey_df$ec_neighb_nl]
+survey_df$ec_neighb_fr <- lut_likert_fr[survey_df$ec_neighb_fr]
+
+# Location question preprocessing
+lut_loc_nl <- c("Brussel" = "Brussels",
+                "Vlanderen" = "Flanders",
+                "Wallonië" = "Wallonia")
+
+lut_loc_fr <- c("Bruxelles-Capitale" = "Brussels",
+                "Flandre" = "Flanders",
+                "Wallonie" = "Wallonia")
+
+survey_df$ec_loc_nl <- lut_loc_nl[survey_df$ec_loc_nl]
+survey_df$ec_loc_fr <- lut_loc_fr[survey_df$ec_loc_fr]
+
+# Gender question preprocessing
+lut_gen_eng <- c("Female" = "Female",
+                 "Male" = "Male",
+                 "Other/I prefer keep it for myself" = "Other")
+
+lut_gen_nl <- c("een vrow" = "Female",
+                "een man" = "Male",
+                "anders/Ik hou het liever voor mezelf." = "Other")
+
+lut_gen_fr <- c("Une femme" = "Female",
+                "Un homme" = "Male",
+                "Autre/Je préfère le garder pour moi" = "Other")
+
+survey_df$ec_gender_eng <- lut_gen_eng[survey_df$ec_gender_eng]
+survey_df$ec_gender_nl <- lut_gen_nl[survey_df$ec_gender_nl]
+survey_df$ec_gender_fr <- lut_gen_fr[survey_df$ec_gender_fr]
+
+# Age question preprocessing
+lut_age_eng <- c("Under 14 years old." = "14_and_below",
+                 "14-17 years old." = "14_17",
+                 "18-24 years old." = "18_24",
+                 "25-34 years old." = "25_34",
+                 "35-44 years old." = "35_44",
+                 "45-54 years old." = "45_54",
+                 "55-64 years old." = "55_64",
+                 "65-74 years old." = "65_74",
+                 "75 years or older." = "75_plus")
+
+lut_age_nl <- c("onder 14 jaar" = "14_and_below",
+                "14-17 jaar" = "14_17",
+                "18-24jaar" = "18_24",
+                "25-34jaar" = "25_34",
+                "35-44jaar" = "35_44",
+                "45-54jaar" = "45_54",
+                "55-64jaar" = "55_64",
+                "65-74jaar" = "65_74",
+                "75 jaar of ouder" = "75_plus")
+
+lut_age_fr <- c("En dessous de 14 ans." = "14_and_below",
+                "14-17 ans." = "14_17",
+                "18-24 ans." = "18_24",
+                "25-34 ans." = "25_34",
+                "35-44 ans." = "35_44",
+                "45-54 ans." = "45_54",
+                "55-64 ans." = "55_64",
+                "65-74 ans." = "65_74",
+                "75 ans ou plus." = "75_plus")
+
+survey_df$ec_age_eng <- lut_age_eng[survey_df$ec_age_eng]
+survey_df$ec_age_nl <- lut_age_nl[survey_df$ec_age_nl]
+survey_df$ec_age_fr <- lut_age_fr[survey_df$ec_age_fr]
+
+# Education question preprocessing
+lut_edu_eng <- c("Primary school or no schooling completed" = "Primary_or_None",
+                 "High-School" = "High_school",
+                 "Trade/technical/vocational training." = "Technical",
+                 "Bachelor’s degree." = "Bachelor",
+                 "Master’s degree." = "Master",
+                 "Doctorate degree." = "PhD")
+
+lut_edu_nl <- c("Lagere school of zonder diploma" = "Primary_or_None",
+                "Humaniora" = "High_school",
+                "Technische Humaniora" = "Technical",
+                "Bachelor" = "Bachelor",
+                "Master" = "Master",
+                "Doctoraat" = "PhD")
+
+lut_edu_nl <- c("Primaire ou sans diplôme" = "Primary_or_None",
+                "Diplôme secondaire" = "High_school",
+                "Diplôme secondaire technique" = "Technical",
+                "Bachelier" = "Bachelor",
+                "Master" = "Master",
+                "Doctorat" = "PhD")
+
+survey_df$ec_edu_eng <- lut_edu_eng[survey_df$ec_edu_eng]
+survey_df$ec_edu_nl <- lut_edu_nl[survey_df$ec_edu_nl]
+survey_df$ec_edu_fr <- lut_edu_nl[survey_df$ec_edu_fr]
 
