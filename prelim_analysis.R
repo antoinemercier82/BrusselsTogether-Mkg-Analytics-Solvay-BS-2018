@@ -3,7 +3,12 @@ library(lubridate)
 library(stringr)
 library(dplyr)
 library(tidyr)
-library(purrr)
+library(ggplot2)
+library(Cairo)
+library(hrbrthemes)
+library(extrafont)
+
+update_geom_font_defaults(family = font_rc_light)
 
 options(device = "CairoWin")
 
@@ -359,9 +364,33 @@ for (i in 1:length(merged_cols)) {
   survey_df[[m]] <- paste0(survey_df[[e]], survey_df[[n]], survey_df[[f]])
 }
 
-survey_df %>% 
-  select(e_g6:c_p1) %>% 
-  tail(n = 10)
 
-as.character(survey_df[153,])
+# Split survey_df_e/survey_df_c
+
+survey_df_e <- survey_df %>%
+  filter(grouping == "Active_member") %>% 
+  select(date, lang, grouping:e_g6, ec_neighb:ec_edu)
+
+temp_coln <- str_replace(names(survey_df_e), "^e_", "")
+temp_coln <- str_replace(temp_coln, "^ec_", "")
+temp_coln <- str_replace(temp_coln, "lang", "language")
+names(survey_df_e) <- temp_coln
+
+
+survey_df_c <- survey_df %>%
+  filter(grouping != "Active_member") %>% 
+  select(date, lang, grouping, c_interest:ec_edu)
+
+temp_coln <- str_replace(names(survey_df_c), "^c_", "")
+temp_coln <- str_replace(temp_coln, "^ec_", "")
+temp_coln <- str_replace(temp_coln, "lang", "language")
+names(survey_df_c) <- temp_coln
+
+p <- survey_df_c %>% 
+  ggplot(aes(x = gender)) +
+  geom_bar(aes(fill = language)) +
+  theme_ipsum_rc()
+
+ggsave(p, filename = "example3.pdf", device = cairo_pdf,
+       width = 4, height = 3, units = "in")
 
