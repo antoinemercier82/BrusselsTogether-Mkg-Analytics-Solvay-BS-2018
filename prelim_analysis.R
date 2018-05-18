@@ -2,6 +2,8 @@ library(readr)
 library(lubridate)
 library(stringr)
 library(dplyr)
+library(tidyr)
+library(purrr)
 
 options(device = "CairoWin")
 
@@ -31,6 +33,13 @@ survey_df$date <- ymd_hms(survey_df$date)
 
 survey_df <- survey_df %>% 
                 filter(date > "2018-04-27 20:00:00")
+
+# Language preprocessing
+lut_lang <- c("English" = "English",
+              "Nederlands" = "Dutch",
+              "Français" = "French")
+
+survey_df$lang <- lut_lang[survey_df$lang]
 
 # Grouping preprocessing
 lut_group_eng <- c("Citizen with no active implication in a local citizen's initiative, social project or social organization." = "Citizen_not_active",
@@ -74,7 +83,12 @@ lut_likert_nl <- c("Helemaal niet akkoord" = "Strongly disagree",
                    "Niet akkoord" = "Disagree",
                    "Geen mening" = "Neither agree nor disagree",
                    "Akkoord" = "Agree",
-                   "Helemaal akkoord" = "Strongly agree")
+                   "Helemaal akkoord" = "Strongly agree",
+                   "Helemaal niet akkoord" = "Strongly disagree",
+                   "niet akkoord" = "Disagree",
+                   "geen mening" = "Neither agree nor disagree",
+                   "akkoord" = "Agree",
+                   "helemaal akkoord" = "Strongly agree")
 
 lut_likert_fr <- c("Pas du tout d'accord" = "Strongly disagree",
                    "Pas d'accord" = "Disagree",
@@ -124,11 +138,11 @@ survey_df$c_interest_nl <- lut_c_int_nl[survey_df$c_interest_nl]
 survey_df$c_interest_fr <- lut_c_int_fr[survey_df$c_interest_fr]
 
 # Citizen already investing question preprocessing
-lut_c_invest_eng <- c("0€" = "0",
-                      "1 - 99€ /year" = "1_99",
-                      "100 - 199€ /year" = "100_199",
-                      "200 - 499€ /year" = "200_499",
-                      "500€ + /year" = "500_plus")
+lut_c_invest_eng <- c("0\u20AC" = "0",
+                      "1 - 99\u20AC /year" = "1_99",
+                      "100 - 199\u20AC /year" = "100_199",
+                      "200 - 499\u20AC /year" = "200_499",
+                      "500\u20AC + /year" = "500_plus")
 
 lut_c_invest_nl <- c("0€" = "0",
                      "1 - 99€ /jaar" = "1_99",
@@ -142,9 +156,81 @@ lut_c_invest_fr <- c("0€" = "0",
                      "200 - 499€ /an" = "200_499",
                      "500€ + /an" = "500_plus")
 
-survey_df$c_invest_eng <- lut_c_invest_eng[survey_df$c_invest_eng]
-survey_df$c_invest_nl <- lut_c_invest_nl[survey_df$c_invest_nl]
-survey_df$c_invest_fr <- lut_c_invest_fr[survey_df$c_invest_fr]
+# survey_df$c_invest_eng <- lut_c_invest_eng[survey_df$c_invest_eng]
+# survey_df$c_invest_nl <- lut_c_invest_nl[survey_df$c_invest_nl]
+# survey_df$c_invest_fr <- lut_c_invest_fr[survey_df$c_invest_fr]
+
+replace_amount <- function(x, a, b) {
+  mask <- str_detect(x, pattern = paste0("^", a))
+  x[which(mask)] <- b
+  return(x)
+}
+
+survey_df$c_invest_eng <- replace_amount(survey_df$c_invest_eng,
+                                         a = "0",
+                                         b = "0")
+
+survey_df$c_invest_eng <- replace_amount(survey_df$c_invest_eng,
+                                         a = "1 ",
+                                         b = "1_99")
+
+survey_df$c_invest_eng <- replace_amount(survey_df$c_invest_eng,
+                                         a = "10",
+                                         b = "100_199")
+
+survey_df$c_invest_eng <- replace_amount(survey_df$c_invest_eng,
+                                         a = "2",
+                                         b = "200_499")
+
+survey_df$c_invest_eng <- replace_amount(survey_df$c_invest_eng,
+                                         a = "5",
+                                         b = "500_plus")
+
+
+
+survey_df$c_invest_nl <- replace_amount(survey_df$c_invest_nl,
+                                         a = "0",
+                                         b = "0")
+
+survey_df$c_invest_nl <- replace_amount(survey_df$c_invest_nl,
+                                         a = "1 ",
+                                         b = "1_99")
+
+survey_df$c_invest_nl <- replace_amount(survey_df$c_invest_nl,
+                                         a = "10",
+                                         b = "100_199")
+
+survey_df$c_invest_nl <- replace_amount(survey_df$c_invest_nl,
+                                         a = "2",
+                                         b = "200_499")
+
+survey_df$c_invest_nl <- replace_amount(survey_df$c_invest_nl,
+                                         a = "5",
+                                         b = "500_plus")
+
+
+
+survey_df$c_invest_fr <- replace_amount(survey_df$c_invest_fr,
+                                         a = "0",
+                                         b = "0")
+
+survey_df$c_invest_fr <- replace_amount(survey_df$c_invest_fr,
+                                         a = "1 ",
+                                         b = "1_99")
+
+survey_df$c_invest_fr <- replace_amount(survey_df$c_invest_fr,
+                                         a = "10",
+                                         b = "100_199")
+
+survey_df$c_invest_fr <- replace_amount(survey_df$c_invest_fr,
+                                         a = "2",
+                                         b = "200_499")
+
+survey_df$c_invest_fr <- replace_amount(survey_df$c_invest_fr,
+                                         a = "5",
+                                         b = "500_plus")
+
+
 
 # Contrib neighb question preprocessing
 survey_df$ec_neighb_nl <- lut_likert_nl[survey_df$ec_neighb_nl]
@@ -152,7 +238,9 @@ survey_df$ec_neighb_fr <- lut_likert_fr[survey_df$ec_neighb_fr]
 
 # Location question preprocessing
 lut_loc_nl <- c("Brussel" = "Brussels",
+                "Brussels" = "Brussels",
                 "Vlanderen" = "Flanders",
+                "Vlaanderen" = "Flanders",
                 "Wallonië" = "Wallonia")
 
 lut_loc_fr <- c("Bruxelles-Capitale" = "Brussels",
@@ -239,4 +327,41 @@ lut_edu_nl <- c("Primaire ou sans diplôme" = "Primary_or_None",
 survey_df$ec_edu_eng <- lut_edu_eng[survey_df$ec_edu_eng]
 survey_df$ec_edu_nl <- lut_edu_nl[survey_df$ec_edu_nl]
 survey_df$ec_edu_fr <- lut_edu_nl[survey_df$ec_edu_fr]
+
+
+
+# Merging columns from the different languages
+all_cols <- names(survey_df)
+eng_cols <- all_cols[str_detect(all_cols, pattern = "eng$")]
+nl_cols <- all_cols[str_detect(all_cols, pattern = "nl$")]
+fr_cols <- all_cols[str_detect(all_cols, pattern = "fr$")]
+
+length(eng_cols) == length(nl_cols)
+length(eng_cols) == length(fr_cols)
+
+merged_cols <- str_replace(eng_cols,
+                           pattern = "_eng$",
+                           replacement = "")
+
+temp_df <- tbl_df(data.frame(matrix(nrow = nrow(survey_df),
+                             ncol = length(merged_cols))))
+colnames(temp_df) <- merged_cols
+
+survey_df <- tbl_df(cbind(survey_df, temp_df))
+
+survey_df[is.na(survey_df)] <- ""
+
+for (i in 1:length(merged_cols)) {
+  m <- merged_cols[i]
+  e <- eng_cols[i]
+  n <- nl_cols[i]
+  f <- fr_cols[i]
+  survey_df[[m]] <- paste0(survey_df[[e]], survey_df[[n]], survey_df[[f]])
+}
+
+survey_df %>% 
+  select(e_g6:c_p1) %>% 
+  tail(n = 10)
+
+as.character(survey_df[153,])
 
