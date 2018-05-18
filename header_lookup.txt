@@ -1,0 +1,96 @@
+google_f_header;df_header
+Timestamp;date
+Please indicate your prefered language for this questionnaire:;lang
+Which of the following groups do you best identify yourself with?;grouping_eng
+As an active member of a local citizen's initiative, social project or social organization, please indicate your level of interest in joining a civic crowdfunding platform:;e_interest_eng
+Face-to-face interactions are necessary for collective action.;e_p1_eng
+For most citizens on a civic crowdfunding platform, personnally funding a citizen's initiative is enough to satisfy their desire to engage in this project.;e_p2_eng
+Citizens would like to participate in debates on local public issues that they care about.;e_p3_eng
+It is relatively easy for citizens to find places where local public issues are collectively debated.;e_p4_eng
+I would welcome the possibility for citizens on a crowdfunding platform to express their disagreement about some aspects of the projects they contribute to financially.;e_p5_eng
+Civic crowdfunding represents a direct threat to the funding of public goods and services by the local government.;e_g1_eng
+I regard crowdfunded citizen's initiatives as a sort of â€˜Do-It-Yourself governmentâ€™.;e_g2_eng
+The local government is able to identify the projects that are most wanted by citizens.;e_g3_eng
+Civic crowdfunding platforms could play a role of intermediary between citizen's initiatives and the local government.;e_g4_eng
+General interest issues are addressed more efficiently by crowdfunded citizen's initiatives than by the local government.;e_g5_eng
+General interest issues are addressed more efficiently by crowdfunded citizen's initiatives than by non-profit organizations subsidized by the local government.;e_g6_eng
+Please indicate your level of interest for citizen's initiatives:;c_interest_eng
+Personally funding a citizen's initiative is enough to satisfy my desire to engage in this project.;c_p1_eng
+I would like to participate in debates on local public issues.;c_p2_eng
+It is relatively easy for citizens to find places where local public issues are collectively debated.;c_p3_eng
+I would be more inclined to contribute financially to a project on a civic crowdfunding platform if I had the possibility to express my disagreement about some aspects of the project.;c_p4_eng
+Face-to-face interactions are necessary for collective action.;c_p5_eng
+Civic crowdfunding represents a direct threat to public funding of services.;c_g1_eng
+I regard crowdfunded citizen's initiatives as a sort of â€˜Do-It-Yourself governmentâ€™.;c_g2_eng
+The local government is able to identify the projects that are most wanted by citizens.;c_g3_eng
+Civic crowdfunding platforms could play a role of intermediary between citizen's initiatives and the local government.;c_g4_eng
+General interest issues are addressed more efficiently by crowdfunded citizen's initiatives than by the local government.;c_g5_eng
+General interest issues are addressed more efficiently by crowdfunded citizen's initiatives than by non-profit organizations subsidized by the local government.;c_g6_eng
+I already invest in social projects:;c_invest_eng
+My interest in contributing to the future of my neighborhood has increased in the past several years.;ec_neighb_eng
+Where do you live ?;ec_loc_eng
+What is your gender?;ec_gender_eng
+Please indicate your age bracket:;ec_age_eng
+What is the highest degree or level of schooling you have completed?;ec_edu_eng
+Tot welke groep identificieert u zich het meeste? ;grouping_nl
+U bent een actief lid van een lokaal burgerinitiatief, een sociaal project of een sociale organisatie. Kan u uw niveau van interesse aanklikken? ;e_interest_nl
+Een face-to-face is noodzakelijk voor een gegroepeerde actie tussen burgers. ;e_p1_nl
+De meeste van de burgers op een civic crowdfunding platform, die een initiatief financieren, voelen zich genoeg betrokken bij het project. ;e_p2_nl
+Burgers wensen deel te nemen aan debatten over maatschappelijke kwesties. ;e_p3_nl
+Het is relatief makkelijk voor burgers om een plaats te vinden waar maatschappelijke kwesties, kunnen besproken worden. ;e_p4_nl
+Ik zou graag een burger, die op een civic crowdfunding platform is uitnodigen, om zijn ongenoegen over bepaalde projecten, die hij financieel gesteund heeft, te bespreken. ;e_p5_nl
+De civic crowdfunding is een rechtstreekse dreiging voor de financiÃ«ring van goederen en diensten door de lokale overheid. ;e_g1_nl
+Ik zie crowdfuning als een soort 'do-it-yourself' regering.;e_g2_nl
+De lokale autoriteiten zijn in staat projecten te identificeren die het waardigste zijn voor de burgers.;e_g3_nl
+Het platform van civic crowdfunding kan een tussenpersoon zijn tussen burgerinitiatieven en lokale overheden.;e_g4_nl
+Vragen van algemeen welzijn worden efficiÃ«nter behandeld door crowfunded burgerinitiatieven dan door lokale overheden. ;e_g5_nl
+Vragen van algemeen welzijn worden beter behandeld door crowdfunded burgerinitiatieven dan niet gouvernementele organisaties die gesubsidieerd zijn door de lokale overheden. ;e_g6_nl
+Gelieve jou niveau van interesse aan te duiden voor burgerinitiatieven: ;c_interest_nl
+Een burgerinitiatief  financieel te steunen, is voldoende om mij betrokken bij het project te voelen. ;c_p1_nl
+Ik wens deel te nemen aan debatten rond maatschappelijke kwesties.;c_p2_nl
+Het is relatief makkelijk voor burgers om een plaats te vinden waar maatschappelijke kwesties kunnen besproken worden. ;c_p3_nl
+Ik zou meer bereid zijn om een project financieel te steunen op een civic crowdfunding platform als ik de mogelijkheid heb om het project mee te evalueren.;c_p4_nl
+Face-to-Face interacties zijn noodzakelijk voor een collectieve actie. ;c_p5_nl
+De civic crowdfunding is een rechtstreekse dreiging voor de financiÃ«ring van goederen en diensten door de lokale overheid. ;c_g1_nl
+Ik zie crowdfunding als een soort 'Do-it-Yourself regering'. ;c_g2_nl
+De lokale autoriteiten zijn in staat projecten te identificeren die het waardigste zijn voor de burgers.;c_g3_nl
+Het platform van civic crowdfunding kan een tussenpersoon zijn tussen burgerinitiatieven en lokale overheden.;c_g4_nl
+Vragen van algemeen welzijn worden efficiÃ«nter behandeld door crowfunded burgerinitiatieven dan door lokale overheden. ;c_g5_nl
+Vragen van algemeen welzijn worden beter behandeld door crowdfunded burgerinitiatieven dan niet gouvernementele organisatie gesubsidieerd door de lokale overheden. ;c_g6_nl
+Ik investeer al in sociale projecten:;c_invest_nl
+Mijn interesse om bij te dragen tot de toekomst van mijn buurt is gestegen afgelopen jaren. ;ec_neighb_nl
+Waar woon je ?;ec_loc_nl
+Je bent :;ec_gender_nl
+Geef je leeftijdscategorie aan ;ec_age_nl
+Wat is uw hoogste behaalde diploma? ;ec_edu_nl
+A quel groupe vous identifieriez-vous le mieux? ;grouping_fr
+En tant que membre actif d'une initiative citoyenne locale, d'un projet social ou d'une organisation sociale, veuillez indiquer le degrÃ© d'intÃ©rÃªt que vous portez Ã  l'adhÃ©sion Ã  une plateforme de crowdfunding citoyen:;e_interest_fr
+Les interactions en face Ã  face sont nÃ©cessaires pour mener une action commune entre citoyens.;e_p1_fr
+Pour la plupart des citoyens sur une plateforme de crowdfunding citoyen, financer personnellement une initiative citoyenne est suffisant pour satisfaire leur dÃ©sir d'engagement dans ce projet.;e_p2_fr
+Les citoyens souhaiteraient participer Ã  des dÃ©bats qui concernent les enjeux publics locaux.;e_p3_fr
+Il est relativement aisÃ© pour les citoyens d'identifier les lieux oÃ¹ sont collectivement dÃ©battus les enjeux publics locaux.;e_p4_fr
+J'accueillerais volontiers la possibilitÃ© pour un citoyen sur une plateforme de crowdfunding citoyen d'exprimer son dÃ©saccord sur certains aspects des initiatives citoyennes auxquelles il contribue financiÃ¨rement.;e_p5_fr
+Le crowdfunding citoyen reprÃ©sente une menace directe pour le financement de biens et services publics par les autoritÃ©s locales.;e_g1_fr
+Je perÃ§ois le crowdfunding citoyen comme une sorte de "Faisons le gouvernement nous-mÃªme".;e_g2_fr
+Les autoritÃ©s locales sont capables d'identifier les projets les plus dÃ©sirÃ©s par les citoyens.;e_g3_fr
+Les plateformes de crowdfunding citoyen pourraient jouer un rÃ´le d'intermÃ©daire entre les initiatives citoyennes et les autoritÃ©s locales. ;e_g4_fr
+Les questions d'intÃ©rÃªt gÃ©nÃ©ral sont mieux adressÃ©es par les initiatives citoyennes financÃ©es de maniÃ¨re participative sur les plateformes de crowdfunding citoyen que par les autoritÃ©s locales.;e_g5_fr
+Les questions d'intÃ©rÃªt gÃ©nÃ©ral sont mieux adressÃ©es par les initiatives citoyennes financÃ©es de maniÃ¨re participative sur les plateformes de crowdfunding citoyen que par les organisations sans but lucratif subsidiÃ©es par le gouvernement.;e_g6_fr
+Veuillez indiquer votre degrÃ© d'intÃ©rÃªt pour les initiatives citoyennes:;c_interest_fr
+Financer personnellement une initiative citoyenne est suffisant pour satisfaire mon dÃ©sir d'engagement dans ce projet.;c_p1_fr
+J'aimerais participer Ã  des dÃ©bats qui concernent les enjeux publics locaux.;c_p2_fr
+Il est relativement aisÃ© pour les citoyens d'identifier les lieux oÃ¹ sont collectivement dÃ©battus les enjeux publics locaux.;c_p3_fr
+Je serais plus disposÃ©.e Ã  contribuer financiÃ¨rement Ã  une initiative citoyenne sur une plateforme de crowdfunding citoyen si j'avais la possibilitÃ© d'exprimer mon dÃ©saccord sur certains aspects de ce projet.;c_p4_fr
+Les interactions en face Ã  face sont nÃ©cessaires pour mener une action commune entre citoyens.;c_p5_fr
+Le crowdfunding citoyen reprÃ©sente une menace directe pour le financement de biens et services publics par les autoritÃ©s locales.;c_g1_fr
+Je perÃ§ois le crowdfunding citoyen comme une sorte de "Faisons le gouvernement nous-mÃªme".;c_g2_fr
+Les autoritÃ©s locales sont capables d'identifier les projets les plus dÃ©sirÃ©s par les citoyens.;c_g3_fr
+Les plateformes de crowdfunding citoyen pourraient jouer un rÃ´le d'intermÃ©daire entre les initiatives citoyennes et les autoritÃ©s locales. ;c_g4_fr
+Les enjeux d'intÃ©rÃªt gÃ©nÃ©ral sont mieux adressÃ©s par les initiatives citoyennes financÃ©es de maniÃ¨re participative sur les plateformes de crowdfunding citoyen que par les autoritÃ©s locales.;c_g5_fr
+Les enjeux d'intÃ©rÃªt gÃ©nÃ©ral sont mieux adressÃ©s par les initiatives citoyennes financÃ©es de maniÃ¨re participative sur les plateformes de crowdfunding citoyen que par les organisations sans but lucratif subsidiÃ©es par le gouvernement.;c_g6_fr
+J'investis dÃ©jÃ  dans des projets Ã  caractÃ¨re social:;c_invest_fr
+Mon intÃ©rÃªt Ã  contribuer au futur de mon quartier a augmentÃ© ces derniÃ¨res annÃ©es.;ec_neighb_fr
+OÃ¹ habitez-vous ?;ec_loc_fr
+Vous Ãªtes :;ec_gender_fr
+Veuillez indiquer la tranche d'Ã¢ge dans laquelle vous vous trouvez :;ec_age_fr
+Quel est votre niveau d'Ã©tudes?;ec_edu_fr
