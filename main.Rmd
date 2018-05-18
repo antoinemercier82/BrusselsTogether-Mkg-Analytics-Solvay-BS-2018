@@ -1,28 +1,67 @@
+---
+title: "Summary of the citizen initiatives and civic crowdfunding market research for BrusselsTogether" 
+subtitle: "R code for reproducibility purposes"
+author: "Paramio J., Piette C., Heremans S., Comté F., Mercier A."
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output:
+  html_document:
+    code_folding: show
+    fig_height: 5
+    theme: simplex
+    toc: yes
+    toc_float: 
+      collapsed: false
+      smooth_scroll: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message = FALSE, warning = FALSE, echo = FALSE, out.width = "50%"}
+# All defaults
+library(knitr)
+include_graphics("inputs/SolvayBS_logo.gif")
+```
+
+## Summary 
+
+This document provides the R code used to summarize the market research done by students at ULB/Sovay Brussels School on citizen initiatives and, in particular, civic crowdfunding. This research originated from a need by BrusselsTogether to better understand the factors driving the success of their own civic crowdfunding platform.
+
+The present document provides all of the code written in R in order for anyone to be able to check and reproduce the findings resulting from the online survey launched in April 2018 by the students.
+
+The inputs files can be retrieved on our [Github page](https://github.com/antoinemercier82/BrusselsTogether-Mkg-Analytics-Solvay-BS-2018).
+
+## Preparations 
+
+```{r loading_packages, message = FALSE, warning = FALSE}
 library(readr)
 library(lubridate)
 library(stringr)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
-library(Cairo)
 library(hrbrthemes)
-library(extrafont)
-library(RColorBrewer)
-library(wesanderson)
+```
 
-# update_geom_font_defaults(family = font_rc_light)
+## Analysis
 
-options(device = "CairoWin")
+### Data
 
+There are only two input files (`Citizen initiative.csv` and  `header_lookup.txt`) which can be retrieved from the Github page mentionned above.
 
-
-# Data import
+```{r message = FALSE, warning = FALSE}
 survey_df <- read_csv("inputs/Citizen initiative.csv")
 header_lookup <- read_delim("inputs/header_lookup.txt", delim = ";")
 names(survey_df) <- header_lookup$df_header
+```
 
 
+### Preprocessing
 
+The preprocessing code is available below, although in order to improve the clarity of this document, **it is better to hide this code** (click on the `Hide` button on the right).
+
+```{r message = FALSE}
 # Dates preprocessing
 survey_df$date <- str_replace(string = survey_df$date,
                               pattern = "M GMT.*$",
@@ -343,6 +382,8 @@ for (i in 1:length(merged_cols)) {
   survey_df[[m]] <- paste0(survey_df[[e]], survey_df[[n]], survey_df[[f]])
 }
 
+survey_df$lang <- factor(survey_df$lang)
+survey_df$ec_gender <- factor(survey_df$ec_gender)
 
 # Split survey_df_e/survey_df_c
 
@@ -365,9 +406,14 @@ temp_coln <- str_replace(temp_coln, "^ec_", "")
 temp_coln <- str_replace(temp_coln, "lang", "language")
 names(survey_df_c) <- temp_coln
 
-survey_df$lang <- factor(survey_df$lang)
-survey_df$ec_gender <- factor(survey_df$ec_gender)
+```
 
+
+### Results
+
+Now we can start analysing the data. Let's start with a bar plot showing the composition of the citizens.
+
+```{r}
 survey_df_c %>% 
   ggplot(aes(x = gender, fill = language)) +
   geom_bar() +
@@ -375,3 +421,5 @@ survey_df_c %>%
        subtitle = "This is a subtitle") +
   theme_ipsum_rc() +
   scale_fill_ipsum()
+```
+
