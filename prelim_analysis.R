@@ -365,13 +365,39 @@ temp_coln <- str_replace(temp_coln, "^ec_", "")
 temp_coln <- str_replace(temp_coln, "lang", "language")
 names(survey_df_c) <- temp_coln
 
-survey_df$lang <- factor(survey_df$lang)
-survey_df$ec_gender <- factor(survey_df$ec_gender)
+survey_df$lang <- factor(survey_df$lang,
+                         levels = c("English", "Dutch", "French"))
+survey_df$ec_gender <- factor(survey_df$ec_gender,
+                              levels = c("Female", "Male", "Other"))
 
-survey_df_c %>% 
+survey_df_e_j <- survey_df_e %>% select(date,
+                                        language,
+                                        grouping,
+                                        loc,
+                                        gender,
+                                        age,
+                                        edu) %>% mutate(resp_type = "Entrepreneur")
+
+survey_df_c_j <- survey_df_c %>% select(date,
+                                        language,
+                                        grouping,
+                                        loc,
+                                        gender,
+                                        age,
+                                        edu) %>% mutate(resp_type = "Citizen")
+
+survey_df_j <- survey_df_e_j %>% bind_rows(survey_df_c_j)
+
+survey_df_j$resp_type <- factor(survey_df_j$resp_type,
+                                levels = c("Entrepreneur", "Citizen"))
+
+
+survey_df_j %>% 
   ggplot(aes(x = gender, fill = language)) +
   geom_bar() +
-  labs(title = "Composition of citizens respondants",
+  facet_wrap(~ resp_type) +
+  labs(title = "Composition of respondants",
        subtitle = "This is a subtitle") +
   theme_ipsum_rc() +
   scale_fill_ipsum()
+
