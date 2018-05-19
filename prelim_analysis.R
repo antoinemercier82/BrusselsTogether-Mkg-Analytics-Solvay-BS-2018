@@ -10,7 +10,7 @@ library(likert)
 library(reshape2)
 library(RColorBrewer)
 library(ggthemes)
-
+library(tibble)
 # update_geom_font_defaults(family = font_rc_light)
 
 # options(device = "CairoWin")
@@ -472,19 +472,89 @@ likert_out_c_g <- likert(survey_df_c_df[,10:15])
 
 plot(likert_out_c_g)
 
-likert_out_c_p_group <- likert(survey_df_c_df[,5:9],
-                               grouping = survey_df_c_df$interest)
+# likert_out_c_p_group <- likert(survey_df_c_df[,5:9],
+#                                grouping = survey_df_c_df$interest)
+# 
+# plot(likert_out_c_p_group,
+#      group.order = c("Not_interested",
+#                      "Could_be_interested_Vol",
+#                      "Could_be_interested_Fund",
+#                      "Is_ready_Vol",
+#                      "Is_ready_Fund") +
+#        theme(text = element_text(size = 14)))
 
-plot(likert_out_c_p_group,
-     group.order = c("Not_interested",
-                     "Could_be_interested_Vol",
-                     "Could_be_interested_Fund",
-                     "Is_ready_Vol",
-                     "Is_ready_Fund") +
-       theme(text = element_text(size = 14)))
 
 
+
+my_df_names <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
+              "Agree", "Strongly agree")
 
 mylevels <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
-              "Agree", "Strongly disagree")
+              "Agree", "Strongly agree")
+
+
+t <- prop.table(table(survey_df_c$interest, survey_df_c$p1), 1)
+
+tab <- rownames_to_column(data.frame(unclass(t)), "rownames_col")
+names(tab) <- my_df_names
+
+numlevels <- length(tab[1,]) - 1
+numcenter <- ceiling(numlevels / 2) + 1
+tab$midvalues <- tab[,numcenter] / 2
+tab2 <- cbind(tab[,1],
+              tab[,2:ceiling(numlevels / 2)],
+              tab$midvalues,
+              tab$midvalues,
+              tab[,numcenter:numlevels + 1])
+
+colnames(tab2) <- c("outcome",
+                    mylevels[1:floor(numlevels / 2)],
+                    "midlow",
+                    "midhigh",
+                    mylevels[numcenter:numlevels])
+
+numlevels <- length(mylevels) + 1
+point1 <- 2
+point2 <- ((numlevels) / 2) + 1
+point3 <- point2 + 1
+point4 <- numlevels + 1
+mymin <- (ceiling(max(rowSums(tab2[,point1:point2])) * 4) / 4) * -100
+mymax <- (ceiling(max(rowSums(tab2[,point3:point4])) * 4) / 4) * 100
+
+numlevels <- length(tab[1,]) - 1
+temp.rows <- length(tab2[,1])
+pal <- brewer.pal((numlevels - 1),"RdBu")
+pal[ceiling(numlevels / 2)] <- "#DFDFDF"
+legend.pal <- pal
+pal <- c(pal[1:(ceiling(numlevels / 2) - 1)],
+         pal[ceiling(numlevels / 2)],
+         pal[ceiling(numlevels / 2)],
+         pal[(ceiling(numlevels / 2) + 1):(numlevels - 1)])
+
+tab3 <- melt(tab2, id = "outcome")
+tab3$col <- rep(pal, each = temp.rows)
+tab3$value <- tab3$value * 100
+tab3$outcome <- str_wrap(tab3$outcome, width = 40)
+tab3$outcome <- factor(tab3$outcome,
+                       levels = tab2$outcome[order(-(tab2[,5] + tab2[,6] + tab2[,7]))])
+highs <- na.omit(tab3[(length(tab3[,1]) / 2) + 1:length(tab3[,1]),])
+lows <- na.omit(tab3[1:(length(tab3[,1]) / 2),])
+lows <- lows[rev(rownames(lows)),]
+
+
+ggplot() +
+  geom_bar(data = highs, aes(x = outcome, y = value, fill = col), position = "stack", stat = "identity") +
+  geom_bar(data = lows, aes(x = outcome, y = -value, fill = col), position = "stack", stat = "identity") +
+  geom_hline(yintercept = 0, color = c("white")) +
+  scale_fill_identity("Percent", labels = mylevels, breaks = legend.pal, guide = "legend") + 
+  theme_fivethirtyeight() + 
+  coord_flip() +
+  labs(title = mytitle, y = "",x = "") +
+  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
+  theme(axis.text.y = element_text(hjust = 0)) +
+  theme(legend.position = "bottom") +
+  scale_y_continuous(breaks = seq(mymin,mymax,25), limits = c(mymin,mymax))
+
+
+
 
