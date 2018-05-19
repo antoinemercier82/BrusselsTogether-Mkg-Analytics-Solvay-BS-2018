@@ -4,22 +4,23 @@ library(stringr)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
-library(Cairo)
 library(hrbrthemes)
-library(extrafont)
+library(lavaan)
+library(likert)
+library(reshape2)
 library(RColorBrewer)
-library(wesanderson)
+library(ggthemes)
 
 # update_geom_font_defaults(family = font_rc_light)
 
-options(device = "CairoWin")
+# options(device = "CairoWin")
 
 
 
 # Data import
 survey_df <- read_csv("inputs/Citizen initiative.csv")
 header_lookup <- read_delim("inputs/header_lookup.txt", delim = ";")
-names(survey_df) <- header_lookup$df_header
+# names(survey_df) <- header_lookup$df_header
 
 
 
@@ -123,6 +124,7 @@ lut_c_int_eng <- c("I am not interested in citizen's initiatives." = "Not_intere
                    "I am ready to volunteer for a citizen's initiative." = "Is_ready_Vol")
 
 lut_c_int_nl <- c("Ik ben niet geinteresseerd door burgerinitiatieven" = "Not_interested",
+                  "Ik zou eventueel geinteresseerd kunnen zijn door het financieren van burgerinitiatieven" = "Could_be_interested_Fund",
                   "Ik zou eventueel geinteresseerd kunnen zijn door het financieel te ondersteunen van burgerinitiatieven" = "Could_be_interested_Fund",
                   "Ik zou eventueel geinteresseerd zijn om een vrijwillige bijdrage te leveren aan een burgerinitiatief" = "Could_be_interested_Vol",
                   "Ik ben klaar om burgerinitiatieven te financieren" = "Is_ready_Fund",
@@ -343,6 +345,10 @@ for (i in 1:length(merged_cols)) {
   survey_df[[m]] <- paste0(survey_df[[e]], survey_df[[n]], survey_df[[f]])
 }
 
+survey_df$lang <- factor(survey_df$lang, ordered = TRUE,
+                         levels = c("English", "Dutch", "French"))
+survey_df$ec_gender <- factor(survey_df$ec_gender, ordered = TRUE,
+                              levels = c("Female", "Male", "Other"))
 
 # Split survey_df_e/survey_df_c
 
@@ -365,10 +371,30 @@ temp_coln <- str_replace(temp_coln, "^ec_", "")
 temp_coln <- str_replace(temp_coln, "lang", "language")
 names(survey_df_c) <- temp_coln
 
-survey_df$lang <- factor(survey_df$lang,
-                         levels = c("English", "Dutch", "French"))
-survey_df$ec_gender <- factor(survey_df$ec_gender,
-                              levels = c("Female", "Male", "Other"))
+survey_df_c$interest <- factor(survey_df_c$interest, ordered = TRUE,
+                                  levels = c("Not_interested",
+                                             "Could_be_interested_Vol",
+                                             "Could_be_interested_Fund",
+                                             "Is_ready_Vol",
+                                             "Is_ready_Fund"))
+
+convert_to_fact_lik <- function(df, columns) {
+  for (column in columns) {
+    df[[column]] <- factor(df[[column]], ordered = TRUE,
+                           levels = c("Strongly disagree",
+                                      "Disagree",
+                                      "Neither agree nor disagree",
+                                      "Agree",
+                                      "Strongly agree"))
+  }
+  return(df)
+}
+
+e_likert_cols <- names(survey_df_e)[5:(length(survey_df_e) - 5)]
+c_likert_cols <- names(survey_df_c)[5:(length(survey_df_c) - 6)]
+
+survey_df_e <- convert_to_fact_lik(survey_df_e, e_likert_cols)
+survey_df_c <- convert_to_fact_lik(survey_df_c, c_likert_cols)
 
 survey_df_e_j <- survey_df_e %>% select(date,
                                         language,
@@ -388,11 +414,11 @@ survey_df_c_j <- survey_df_c %>% select(date,
 
 survey_df_j <- survey_df_e_j %>% bind_rows(survey_df_c_j)
 
-survey_df_j$resp_type <- factor(survey_df_j$resp_type,
+survey_df_j$resp_type <- factor(survey_df_j$resp_type, ordered = TRUE,
                                 levels = c("Entrepreneur", "Citizen"))
 
 
-survey_df_j %>% 
+survey_df_j %>%
   ggplot(aes(x = gender, fill = language)) +
   geom_bar() +
   facet_wrap(~ resp_type) +
@@ -400,4 +426,65 @@ survey_df_j %>%
        subtitle = "This is a subtitle") +
   theme_ipsum_rc() +
   scale_fill_ipsum()
+
+
+
+
+header_lookup$df_header
+which(header_lookup$df_header == "c_p1_eng")
+which(header_lookup$df_header == "c_g6_eng")
+
+which(names(survey_df_c) == "p1")
+which(names(survey_df_c) == "g6")
+
+questions_c <- header_lookup$google_f_header[17:27]
+quest_code_c <- names(survey_df_c)[5:15]
+survey_df_c_df <- as.data.frame(survey_df_c)
+names(survey_df_c_df)[5:15] <- questions_c
+
+
+header_lookup$df_header
+which(header_lookup$df_header == "e_p1_eng")
+which(header_lookup$df_header == "e_g6_eng")
+
+which(names(survey_df_e) == "p1")
+which(names(survey_df_e) == "g6")
+
+questions_e <- header_lookup$google_f_header[5:15]
+quest_code_e <- names(survey_df_e)[5:15]
+survey_df_e_df <- as.data.frame(survey_df_e)
+names(survey_df_e_df)[5:15] <- questions_e
+
+# 
+# glimpse(survey_df_c)
+# 
+# levels(survey_df_c$`Personally funding a citizen's initiative is enough to satisfy my desire to engage in this project.`)
+# levels(survey_df_c$`I would like to participate in debates on local public issues.`)
+# levels(survey_df_c$`It is relatively easy for citizens to find places where local public issues are collectively debated.`)
+# levels(survey_df_c$`I would be more inclined to contribute financially to a project on a civic crowdfunding platform if I had the possibility to express my disagreement about some aspects of the project.`)
+# levels(survey_df_c$`Face-to-face interactions are necessary for collective action.`)
+
+likert_out_c_p <- likert(survey_df_c_df[,5:9])
+
+plot(likert_out_c_p)
+
+likert_out_c_g <- likert(survey_df_c_df[,10:15])
+
+plot(likert_out_c_g)
+
+likert_out_c_p_group <- likert(survey_df_c_df[,5:9],
+                               grouping = survey_df_c_df$interest)
+
+plot(likert_out_c_p_group,
+     group.order = c("Not_interested",
+                     "Could_be_interested_Vol",
+                     "Could_be_interested_Fund",
+                     "Is_ready_Vol",
+                     "Is_ready_Fund") +
+       theme(text = element_text(size = 14)))
+
+
+
+mylevels <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
+              "Agree", "Strongly disagree")
 
