@@ -9,7 +9,7 @@ Citizens would like to participate in debates on local public issues that they c
 It is relatively easy for citizens to find places where local public issues are collectively debated.;e_p4_eng
 I would welcome the possibility for citizens on a crowdfunding platform to express their disagreement about some aspects of the projects they contribute to financially.;e_p5_eng
 Civic crowdfunding represents a direct threat to the funding of public goods and services by the local government.;e_g1_eng
-I regard crowdfunded citizen's initiatives as a sort of â€˜Do-It-Yourself governmentâ€™.;e_g2_eng
+I regard crowdfunded citizen's initiatives as a sort of _Do-It-Yourself government_.;e_g2_eng
 The local government is able to identify the projects that are most wanted by citizens.;e_g3_eng
 Civic crowdfunding platforms could play a role of intermediary between citizen's initiatives and the local government.;e_g4_eng
 General interest issues are addressed more efficiently by crowdfunded citizen's initiatives than by the local government.;e_g5_eng
@@ -21,7 +21,7 @@ It is relatively easy for citizens to find places where local public issues are 
 I would be more inclined to contribute financially to a project on a civic crowdfunding platform if I had the possibility to express my disagreement about some aspects of the project.;c_p4_eng
 Face-to-face interactions are necessary for collective action.;c_p5_eng
 Civic crowdfunding represents a direct threat to public funding of services.;c_g1_eng
-I regard crowdfunded citizen's initiatives as a sort of â€˜Do-It-Yourself governmentâ€™.;c_g2_eng
+I regard crowdfunded citizen's initiatives as a sort of _Do-It-Yourself government_.;c_g2_eng
 The local government is able to identify the projects that are most wanted by citizens.;c_g3_eng
 Civic crowdfunding platforms could play a role of intermediary between citizen's initiatives and the local government.;c_g4_eng
 General interest issues are addressed more efficiently by crowdfunded citizen's initiatives than by the local government.;c_g5_eng
