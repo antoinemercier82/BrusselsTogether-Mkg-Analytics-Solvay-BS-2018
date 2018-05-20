@@ -256,7 +256,7 @@ survey_df$ec_gender_nl <- lut_gen_nl[survey_df$ec_gender_nl]
 survey_df$ec_gender_fr <- lut_gen_fr[survey_df$ec_gender_fr]
 
 # Age question preprocessing
-lut_age_eng <- c("Under 14 years old." = "14_and_below",
+lut_age_eng <- c("Under 14 years old." = "below_14",
                  "14-17 years old." = "14_17",
                  "18-24 years old." = "18_24",
                  "25-34 years old." = "25_34",
@@ -266,7 +266,7 @@ lut_age_eng <- c("Under 14 years old." = "14_and_below",
                  "65-74 years old." = "65_74",
                  "75 years or older." = "75_plus")
 
-lut_age_nl <- c("onder 14 jaar" = "14_and_below",
+lut_age_nl <- c("onder 14 jaar" = "below_14",
                 "14-17 jaar" = "14_17",
                 "18-24jaar" = "18_24",
                 "25-34jaar" = "25_34",
@@ -276,7 +276,7 @@ lut_age_nl <- c("onder 14 jaar" = "14_and_below",
                 "65-74jaar" = "65_74",
                 "75 jaar of ouder" = "75_plus")
 
-lut_age_fr <- c("En dessous de 14 ans." = "14_and_below",
+lut_age_fr <- c("En dessous de 14 ans." = "below_14",
                 "14-17 ans." = "14_17",
                 "18-24 ans." = "18_24",
                 "25-34 ans." = "25_34",
@@ -305,7 +305,7 @@ lut_edu_nl <- c("Lagere school of zonder diploma" = "Primary_or_None",
                 "Master" = "Master",
                 "Doctoraat" = "PhD")
 
-lut_edu_nl <- c("Primaire ou sans diplôme" = "Primary_or_None",
+lut_edu_fr <- c("Primaire ou sans diplôme" = "Primary_or_None",
                 "Diplôme secondaire" = "High_school",
                 "Diplôme secondaire technique" = "Technical",
                 "Bachelier" = "Bachelor",
@@ -314,7 +314,7 @@ lut_edu_nl <- c("Primaire ou sans diplôme" = "Primary_or_None",
 
 survey_df$ec_edu_eng <- lut_edu_eng[survey_df$ec_edu_eng]
 survey_df$ec_edu_nl <- lut_edu_nl[survey_df$ec_edu_nl]
-survey_df$ec_edu_fr <- lut_edu_nl[survey_df$ec_edu_fr]
+survey_df$ec_edu_fr <- lut_edu_fr[survey_df$ec_edu_fr]
 
 
 
@@ -348,6 +348,9 @@ survey_df$lang <- factor(survey_df$lang, ordered = TRUE,
                          levels = c("English", "Dutch", "French"))
 survey_df$ec_gender <- factor(survey_df$ec_gender, ordered = TRUE,
                               levels = c("Female", "Male", "Other"))
+survey_df$ec_gender <- factor(survey_df$ec_gender, ordered = TRUE,
+                              levels = c("Female", "Male", "Other"))
+
 
 # Split survey_df_e/survey_df_c
 
@@ -360,6 +363,30 @@ temp_coln <- str_replace(temp_coln, "^ec_", "")
 temp_coln <- str_replace(temp_coln, "lang", "language")
 names(survey_df_e) <- temp_coln
 
+survey_df_e$age <- factor(survey_df_e$age, ordered = TRUE,
+                              levels = c("14_and_below",
+                                         "14_17",
+                                         "18_24",
+                                         "25_34",
+                                         "35_44",
+                                         "45_54",
+                                         "55_64",
+                                         "65_74",
+                                         "75_plus"))
+
+survey_df_e$loc <- factor(survey_df_e$loc, ordered = TRUE,
+                          levels = c("Brussels",
+                                     "Flanders",
+                                     "Wallonia"))
+
+survey_df_e$edu <- factor(survey_df_e$edu, ordered = TRUE,
+                          levels = c("Primary_or_None",
+                                     "High_school",
+                                     "Technical",
+                                     "Bachelor",
+                                     "Master",
+                                     "PhD"))
+
 
 survey_df_c <- survey_df %>%
   filter(grouping != "Active_member") %>% 
@@ -370,6 +397,35 @@ temp_coln <- str_replace(temp_coln, "^ec_", "")
 temp_coln <- str_replace(temp_coln, "lang", "language")
 names(survey_df_c) <- temp_coln
 
+survey_df_c$age <- factor(survey_df_c$age, ordered = TRUE,
+                          levels = c("14_and_below",
+                                     "14_17",
+                                     "18_24",
+                                     "25_34",
+                                     "35_44",
+                                     "45_54",
+                                     "55_64",
+                                     "65_74",
+                                     "75_plus"))
+
+survey_df_c$loc <- factor(survey_df_c$loc, ordered = TRUE,
+                          levels = c("Brussels",
+                                     "Flanders",
+                                     "Wallonia"))
+
+survey_df_c$edu <- factor(survey_df_c$edu, ordered = TRUE,
+                          levels = c("Primary_or_None",
+                                     "High_school",
+                                     "Technical",
+                                     "Bachelor",
+                                     "Master",
+                                     "PhD"))
+
+survey_df_c$grouping <- factor(survey_df_c$grouping, ordered = TRUE,
+                               levels = c("Citizen_not_active",
+                                          "Citizen_casual_vol"))
+
+unique(survey_df_c$grouping)
 survey_df_c$interest <- factor(survey_df_c$interest, ordered = TRUE,
                                   levels = c("Not_interested",
                                              "Could_be_interested_Vol",
@@ -415,6 +471,9 @@ c_likert_cols <- names(survey_df_c)[5:(length(survey_df_c) - 6)]
 
 survey_df_e <- convert_to_fact_lik(survey_df_e, e_likert_cols)
 survey_df_c <- convert_to_fact_lik(survey_df_c, c_likert_cols)
+
+survey_df_e <- convert_to_fact_lik(survey_df_e, "neighb")
+survey_df_c <- convert_to_fact_lik(survey_df_c, "neighb")
 
 survey_df_c$invest <- factor(survey_df_c$invest, ordered = TRUE,
                              levels = c("", "0", "1_99", "100_199",
@@ -725,12 +784,17 @@ lik_plot(t_c_g, my_df_names_c_g, mylevels_c_g, factor_levels_c_g, c_g_title)
 
 survey_df_c %>%
   count(interest) %>%
-  rename(interest_total = n) %>%
-  mutate(interest = reorder(interest, interest_total)) %>%
-  ggplot(aes(x = interest, y = interest_total)) +
-  geom_col(show.legend = FALSE) +
+  rename(interest_count = n) %>%
+  mutate(interest = reorder(interest, interest_count)) %>%
+  ggplot(aes(x = interest, y = interest_count)) +
+  geom_col() +
+  theme_ipsum_rc(grid = "X") +
+  scale_fill_ipsum() +
   coord_flip() +
-  theme_ipsum_rc(grid = "X")
+  labs(title = "Distribution of responses to interest question", x = "") +
+  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
+  theme(axis.text.y = element_text(hjust = 0)) +
+  theme(plot.margin = unit(c(1,1,1,0), "cm"))
 
 
 
@@ -800,6 +864,23 @@ t_g6 <- prop.table(table(survey_df_c$interest, survey_df_c$g6), 1)
 g6_title <- "General interest issues are addressed more efficiently\nby crowdfunded citizen's initiatives than by\nnon-profit organizations subsidized by the local government.\n"
 
 lik_plot(t_g6, my_df_names, mylevels, factor_levels, g6_title)
+
+
+
+survey_df_c %>%
+  filter(invest != "") %>% 
+  count(invest) %>%
+  rename(invest_count = n) %>%
+  mutate(invest = reorder(invest, invest_count)) %>%
+  ggplot(aes(x = invest, y = invest_count)) +
+  geom_col() +
+  theme_ipsum_rc(grid = "X") +
+  scale_fill_ipsum() +
+  coord_flip() +
+  labs(title = "Distribution of responses to past investment question", x = "") +
+  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
+  theme(axis.text.y = element_text(hjust = 0)) +
+  theme(plot.margin = unit(c(1,1,1,0), "cm"))
 
 
 
@@ -884,3 +965,268 @@ g6_title <- "General interest issues are addressed more efficiently\nby crowdfun
 
 lik_plot(t_g6, my_df_names_c_inv, mylevels_c_inv,
          factor_levels_c_inv, g6_title)
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Confirmatory Factor Analysis
+
+meta <- data_frame(question = header_lookup$google_f_header[17:27],
+                   variable = names(survey_df_c)[5:15])
+
+meta
+
+survey_df_c_mat <- survey_df_c %>% 
+  filter(gender %in% c("Female", "Male")) %>% 
+  select(language:edu) %>% 
+  data.matrix() %>% 
+  as_data_frame()
+
+nrow(survey_df_c_mat)
+names(survey_df_c)
+
+class(survey_df_c_mat)
+survey_df_c_mat <- survey_df_c_mat %>% 
+  mutate(male = gender == 2)
+
+survey_df_c_mat$male <- as.numeric(survey_df_c_mat$male)
+
+survey_df_c_mat[1:10,]
+
+model <- "
+partcip_will =~ p2 + p1 + p3 + p4 + p5
+civic_crowd_gov =~ g4 + g1 + g2 + g3 + g5 + g6
+"
+
+cat(model)
+
+fit <- cfa(model = model, data = survey_df_c_mat)
+
+summary(fit)
+
+summary(fit, standardized = TRUE)
+
+parameterestimates(fit)
+
+sfit <- standardizedsolution(fit)
+
+sfit %>% 
+  filter(op == "=~")
+
+fitmeasures(fit, c("npar", "chisq", "df", "cfi", "rmsea", "srmr"))
+
+inspect(fit, "r2")
+
+inspect(fit, "sampstat")
+
+fit2 <- cfa(model = model, data = survey_df_c_mat,
+           orthogonal = TRUE)
+
+summary(fit2, standardized = TRUE)
+
+parameterestimates(fit2)
+
+sfit3 <- standardizedsolution(fit2)
+
+sfit3 %>% 
+  filter(op == "=~")
+
+fitmeasures(fit2, c("npar", "chisq", "df", "cfi", "rmsea", "srmr"))
+
+inspect(fit2, "r2")
+
+inspect(fit2, "sampstat")
+
+anova(fit, fit2)
+
+modificationindices(fit) %>% 
+  arrange(desc(mi)) %>% 
+  head(10)
+
+modificationindices(fit2) %>% 
+  arrange(desc(mi)) %>% 
+  head(10)
+
+model3 <- "
+partcip_will =~ p2 + p1 + p3 + p4 + p5
+civic_crowd_gov =~ g4 + g1 + g2 + g3 + g5 + g6
+p1 ~~ p5
+"
+
+model4 <- "
+partcip_will =~ p2 + p1 + p3 + p4 + p5
+civic_crowd_gov =~ g4 + g1 + g2 + g3 + g5 + g6
+p2 ~~ p4
+"
+
+cat(model3)
+
+fit3 <- cfa(model = model3, data = survey_df_c_mat)
+
+summary(fit3, standardized = TRUE)
+
+parameterestimates(fit3)
+
+sfit3 <- standardizedsolution(fit3)
+
+sfit3 %>% 
+  filter(op == "=~")
+
+fitmeasures(fit3, c("npar", "chisq", "df", "cfi", "rmsea", "srmr"))
+
+inspect(fit3, "r2")
+
+inspect(fit3, "sampstat")
+
+anova(fit, fit3)
+
+
+fit4 <- cfa(model = model4, data = survey_df_c_mat,
+            orthogonal = TRUE)
+
+summary(fit4, standardized = TRUE)
+
+parameterestimates(fit4)
+
+sfit4 <- standardizedsolution(fit4)
+
+sfit4 %>% 
+  filter(op == "=~")
+
+fitmeasures(fit4, c("npar", "chisq", "df", "cfi", "rmsea", "srmr"))
+
+inspect(fit4, "r2")
+
+inspect(fit4, "sampstat")
+
+anova(fit2, fit4)
+
+
+fits <- list(fit = fit, fit3 = fit3, fit4 = fit4)
+
+round(sapply(fits, function(X) 
+  fitmeasures(X, c("npar", "chisq", "df", "cfi", "rmsea", "srmr"))), 3)
+
+
+pfit3 <- data.frame(predict(fit3))
+survey_df_c_mat2 <- cbind(survey_df_c_mat, pfit3)
+
+head(survey_df_c_mat2)
+
+survey_df_c_mat2 %>% 
+  ggplot(aes(x = partcip_will, y = civic_crowd_gov)) +
+  geom_point()
+
+nrow(survey_df_c)
+nrow(survey_df_c_mat2)
+nrow(pfit3)
+
+survey_df_c <- survey_df_c %>% 
+  filter(gender %in% c("Female", "Male")) %>% 
+  cbind(partcip_will = survey_df_c_mat2$partcip_will,
+        civic_crowd_gov = survey_df_c_mat2$civic_crowd_gov)
+
+survey_df_c %>% 
+  ggplot(aes(y = partcip_will, x = gender, fill = gender)) +
+  geom_boxplot(alpha = .5) +
+  labs(title = "Relationship btw particip_will and gender",
+       subtitle = "This is a subtitle") +
+  theme_ipsum_rc() +
+  scale_fill_ipsum() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank())
+
+survey_df_c %>% 
+  ggplot(aes(y = partcip_will, x = age, fill = age)) +
+  geom_boxplot(alpha = .5) +
+  labs(title = "Relationship btw particip_will and age",
+       subtitle = "This is a subtitle") +
+  theme_ipsum_rc() +
+  scale_fill_ipsum() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank())
+
+
+
+survey_df_c %>% 
+  ggplot(aes(y = civic_crowd_gov, x = gender, fill = gender)) +
+  geom_boxplot(alpha = .5) +
+  labs(title = "Relationship btw civic_crowd_gov and gender",
+       subtitle = "This is a subtitle") +
+  theme_ipsum_rc() +
+  scale_fill_ipsum() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank())
+
+survey_df_c %>% 
+  ggplot(aes(y = civic_crowd_gov, x = age, fill = age)) +
+  geom_boxplot(alpha = .5) +
+  labs(title = "Relationship btw civic_crowd_gov and age",
+       subtitle = "This is a subtitle") +
+  theme_ipsum_rc() +
+  scale_fill_ipsum() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank())
+
+
+survey_df_c %>% 
+  ggplot(aes(y = partcip_will, x = interest, fill = interest)) +
+  geom_boxplot(alpha = .5) +
+  labs(title = "Relationship btw particip_will and interest",
+       subtitle = "This is a subtitle") +
+  theme_ipsum_rc() +
+  scale_fill_ipsum() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank())
+
+survey_df_c %>% 
+  ggplot(aes(y = civic_crowd_gov, x = interest, fill = interest)) +
+  geom_boxplot(alpha = .5) +
+  labs(title = "Relationship btw civic_crowd_gov and interest",
+       subtitle = "This is a subtitle") +
+  theme_ipsum_rc() +
+  scale_fill_ipsum() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank())
+
+
+sem_model <- "
+partcip_will =~ p2 + p1 + p3 + p4 + p5
+civic_crowd_gov =~ g4 + g1 + g2 + g3 + g5 + g6
+p1 ~~ p5
+interest ~ partcip_will
+interest ~ civic_crowd_gov
+"
+cat(sem_model)
+
+semfit <- sem(sem_model, survey_df_c_mat)
+
+summary(semfit)
+
+p_semfit <- parameterestimates(semfit)
+
+p_semfit %>% 
+  filter(op == "~")
+
+

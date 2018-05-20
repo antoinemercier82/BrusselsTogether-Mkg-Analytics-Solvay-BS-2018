@@ -31,7 +31,7 @@ This document provides the R code used to summarize the market research done by 
 
 The present document provides all of the code written in R in order for anyone to be able to check and reproduce the findings resulting from the online survey launched in April 2018 by the students.
 
-The input files can be retrieved on our [Github page](https://github.com/antoinemercier82/BrusselsTogether-Mkg-Analytics-Solvay-BS-2018).
+The input files as well as the code can be retrieved on our [Github page](https://github.com/antoinemercier82/BrusselsTogether-Mkg-Analytics-Solvay-BS-2018).
 
 # Data preprocessing
 
@@ -353,7 +353,7 @@ lut_edu_nl <- c("Lagere school of zonder diploma" = "Primary_or_None",
                 "Master" = "Master",
                 "Doctoraat" = "PhD")
 
-lut_edu_nl <- c("Primaire ou sans diplôme" = "Primary_or_None",
+lut_edu_fr <- c("Primaire ou sans diplôme" = "Primary_or_None",
                 "Diplôme secondaire" = "High_school",
                 "Diplôme secondaire technique" = "Technical",
                 "Bachelier" = "Bachelor",
@@ -362,7 +362,7 @@ lut_edu_nl <- c("Primaire ou sans diplôme" = "Primary_or_None",
 
 survey_df$ec_edu_eng <- lut_edu_eng[survey_df$ec_edu_eng]
 survey_df$ec_edu_nl <- lut_edu_nl[survey_df$ec_edu_nl]
-survey_df$ec_edu_fr <- lut_edu_nl[survey_df$ec_edu_fr]
+survey_df$ec_edu_fr <- lut_edu_fr[survey_df$ec_edu_fr]
 
 
 
@@ -408,6 +408,29 @@ temp_coln <- str_replace(temp_coln, "^ec_", "")
 temp_coln <- str_replace(temp_coln, "lang", "language")
 names(survey_df_e) <- temp_coln
 
+survey_df_e$age <- factor(survey_df_e$age, ordered = TRUE,
+                              levels = c("14_and_below",
+                                         "14_17",
+                                         "18_24",
+                                         "25_34",
+                                         "35_44",
+                                         "45_54",
+                                         "55_64",
+                                         "65_74",
+                                         "75_plus"))
+
+survey_df_e$loc <- factor(survey_df_e$loc, ordered = TRUE,
+                          levels = c("Brussels",
+                                     "Flanders",
+                                     "Wallonia"))
+
+survey_df_e$edu <- factor(survey_df_e$edu, ordered = TRUE,
+                          levels = c("Primary_or_None",
+                                     "High_school",
+                                     "Technical",
+                                     "Bachelor",
+                                     "Master",
+                                     "PhD"))
 
 survey_df_c <- survey_df %>%
   filter(grouping != "Active_member") %>% 
@@ -417,6 +440,30 @@ temp_coln <- str_replace(names(survey_df_c), "^c_", "")
 temp_coln <- str_replace(temp_coln, "^ec_", "")
 temp_coln <- str_replace(temp_coln, "lang", "language")
 names(survey_df_c) <- temp_coln
+
+survey_df_c$age <- factor(survey_df_c$age, ordered = TRUE,
+                          levels = c("14_and_below",
+                                     "14_17",
+                                     "18_24",
+                                     "25_34",
+                                     "35_44",
+                                     "45_54",
+                                     "55_64",
+                                     "65_74",
+                                     "75_plus"))
+
+survey_df_c$loc <- factor(survey_df_c$loc, ordered = TRUE,
+                          levels = c("Brussels",
+                                     "Flanders",
+                                     "Wallonia"))
+
+survey_df_c$edu <- factor(survey_df_c$edu, ordered = TRUE,
+                          levels = c("Primary_or_None",
+                                     "High_school",
+                                     "Technical",
+                                     "Bachelor",
+                                     "Master",
+                                     "PhD"))
 
 survey_df_c$interest <- factor(survey_df_c$interest, ordered = TRUE,
                                   levels = c("Not_interested",
@@ -443,6 +490,9 @@ c_likert_cols <- names(survey_df_c)[5:(length(survey_df_c) - 6)]
 
 survey_df_e <- convert_to_fact_lik(survey_df_e, e_likert_cols)
 survey_df_c <- convert_to_fact_lik(survey_df_c, c_likert_cols)
+
+survey_df_e <- convert_to_fact_lik(survey_df_e, "neighb")
+survey_df_c <- convert_to_fact_lik(survey_df_c, "neighb")
 
 survey_df_c$invest <- factor(survey_df_c$invest, ordered = TRUE,
                              levels = c("", "0", "1_99", "100_199",
