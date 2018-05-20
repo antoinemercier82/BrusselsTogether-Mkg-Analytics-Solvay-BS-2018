@@ -376,6 +376,27 @@ survey_df_c$interest <- factor(survey_df_c$interest, ordered = TRUE,
                                              "Could_be_interested_Fund",
                                              "Is_ready_Vol",
                                              "Is_ready_Fund"))
+names(survey_df)
+
+survey_df %>%
+  filter(grouping != "Active_member") %>% 
+  count(c_interest) %>%
+  rename(interest_total = n) %>%
+  mutate(c_interest = reorder(c_interest, interest_total)) %>%
+  ggplot(aes(x = c_interest, y = interest_total)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  theme_ipsum_rc(grid = "X")
+
+survey_df_c %>%
+  count(interest) %>%
+  rename(interest_total = n) %>%
+  mutate(interest = reorder(interest, interest_total)) %>%
+  ggplot(aes(x = interest, y = interest_total)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  theme_ipsum_rc(grid = "X") +
+  scale_fill_ipsum()
 
 convert_to_fact_lik <- function(df, columns) {
   for (column in columns) {
@@ -394,6 +415,10 @@ c_likert_cols <- names(survey_df_c)[5:(length(survey_df_c) - 6)]
 
 survey_df_e <- convert_to_fact_lik(survey_df_e, e_likert_cols)
 survey_df_c <- convert_to_fact_lik(survey_df_c, c_likert_cols)
+
+survey_df_c$invest <- factor(survey_df_c$invest, ordered = TRUE,
+                             levels = c("", "0", "1_99", "100_199",
+                                        "200_499", "500_plus"))
 
 survey_df_e_j <- survey_df_e %>% select(date,
                                         language,
@@ -416,9 +441,6 @@ survey_df_j <- survey_df_e_j %>% bind_rows(survey_df_c_j)
 survey_df_j$resp_type <- factor(survey_df_j$resp_type, ordered = TRUE,
                                 levels = c("Entrepreneur", "Citizen"))
 
-survey_df_c$invest <- factor(survey_df_c$invest, ordered = TRUE,
-                             levels = c("", "0", "1_99", "100_199",
-                                        "200_499", "500_plus"))
 
 
 survey_df_j %>%
@@ -700,6 +722,15 @@ c_g_title <- "Citizens - Government questions\n"
 lik_plot(t_c_g, my_df_names_c_g, mylevels_c_g, factor_levels_c_g, c_g_title)
 
 
+
+survey_df_c %>%
+  count(interest) %>%
+  rename(interest_total = n) %>%
+  mutate(interest = reorder(interest, interest_total)) %>%
+  ggplot(aes(x = interest, y = interest_total)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  theme_ipsum_rc(grid = "X")
 
 
 

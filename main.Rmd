@@ -171,6 +171,7 @@ lut_c_int_eng <- c("I am not interested in citizen's initiatives." = "Not_intere
                    "I am ready to volunteer for a citizen's initiative." = "Is_ready_Vol")
 
 lut_c_int_nl <- c("Ik ben niet geinteresseerd door burgerinitiatieven" = "Not_interested",
+                  "Ik zou eventueel geinteresseerd kunnen zijn door het financieren van burgerinitiatieven" = "Could_be_interested_Fund",
                   "Ik zou eventueel geinteresseerd kunnen zijn door het financieel te ondersteunen van burgerinitiatieven" = "Could_be_interested_Fund",
                   "Ik zou eventueel geinteresseerd zijn om een vrijwillige bijdrage te leveren aan een burgerinitiatief" = "Could_be_interested_Vol",
                   "Ik ben klaar om burgerinitiatieven te financieren" = "Is_ready_Fund",
@@ -424,6 +425,7 @@ survey_df_c$interest <- factor(survey_df_c$interest, ordered = TRUE,
                                              "Is_ready_Vol",
                                              "Is_ready_Fund"))
 
+
 convert_to_fact_lik <- function(df, columns) {
   for (column in columns) {
     df[[column]] <- factor(df[[column]],
@@ -441,6 +443,10 @@ c_likert_cols <- names(survey_df_c)[5:(length(survey_df_c) - 6)]
 
 survey_df_e <- convert_to_fact_lik(survey_df_e, e_likert_cols)
 survey_df_c <- convert_to_fact_lik(survey_df_c, c_likert_cols)
+
+survey_df_c$invest <- factor(survey_df_c$invest, ordered = TRUE,
+                             levels = c("", "0", "1_99", "100_199",
+                                        "200_499", "500_plus"))
 
 survey_df_e_j <- survey_df_e %>% select(date,
                                         language,
@@ -463,9 +469,6 @@ survey_df_j <- survey_df_e_j %>% bind_rows(survey_df_c_j)
 survey_df_j$resp_type <- factor(survey_df_j$resp_type,
                                 levels = c("Entrepreneur", "Citizen"))
 
-survey_df_c$invest <- factor(survey_df_c$invest, ordered = TRUE,
-                             levels = c("", "0", "1_99", "100_199",
-                                        "200_499", "500_plus"))
 
 ```
 
@@ -667,6 +670,26 @@ lik_plot(t_c_g, my_df_names_c_g, mylevels_c_g, factor_levels_c_g, c_g_title)
 
 ###  Likert plots for citizens/participative questions grouped by interest
 
+Before we investigate the relationship between the answers to the likert scale questions and the interest to volunteer/fund, which is our dependent variable, we should investigate the number of citizens who belong each of the categories for our dependent variable. We can see this distribution in the following plot:
+
+```{r fig.height = 2.9, fig.width = 10, fig.align = "center"}
+survey_df_c %>%
+  count(interest) %>%
+  rename(interest_count = n) %>%
+  mutate(interest = reorder(interest, interest_count)) %>%
+  ggplot(aes(x = interest, y = interest_count)) +
+  geom_col() +
+  theme_ipsum_rc(grid = "X") +
+  scale_fill_ipsum() +
+  coord_flip() +
+  labs(title = "Distribution of responses to interest question", x = "") +
+  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
+  theme(axis.text.y = element_text(hjust = 0)) +
+  theme(plot.margin = unit(c(1,1,1,0), "cm"))
+
+```
+
+
 ```{r fig.height = 4, fig.width = 10, fig.align = "center"}
 my_df_names <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
                  "Agree", "Strongly agree")
@@ -769,6 +792,28 @@ lik_plot(t_g6, my_df_names, mylevels, factor_levels, g6_title)
 
 
 ###  Likert plots for citizens/participative questions grouped by past investment
+
+Before we investigate the relationship between the answers to the likert scale questions and the past investment, which could be another dependent variable, we should investigate the number of citizens who belong each of the categories for this variable. We can see this distribution in the following plot:
+
+```{r fig.height = 2.9, fig.width = 10, fig.align = "center"}
+survey_df_c %>%
+  filter(invest != "") %>% 
+  count(invest) %>%
+  rename(invest_count = n) %>%
+  mutate(invest = reorder(invest, invest_count)) %>%
+  ggplot(aes(x = invest, y = invest_count)) +
+  geom_col() +
+  theme_ipsum_rc(grid = "X") +
+  scale_fill_ipsum() +
+  coord_flip() +
+  labs(title = "Distribution of responses to past investment question", x = "") +
+  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
+  theme(axis.text.y = element_text(hjust = 0)) +
+  theme(plot.margin = unit(c(1,1,1,0), "cm"))
+
+```
+
+As we can see from the previous plot, the distribution is highly imbalanced among the categories, and therefore, in the following plots, the percentages for the categories above 100€ represent only a handful of individuals.
 
 ```{r fig.height = 4, fig.width = 10, fig.align = "center"}
 my_df_names_c_inv <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
