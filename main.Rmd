@@ -7,11 +7,11 @@ output:
   html_document:
     code_folding: hide
     fig_height: 5
-    theme: simplex
+    theme: flatly
     toc: yes
     toc_depth: 4
     toc_float:
-      collapsed: true
+      collapsed: false
       smooth_scroll: true
 ---
 
@@ -25,7 +25,7 @@ library(knitr)
 include_graphics("inputs/SolvayBS_logo.gif")
 ```
 
-## Summary 
+# Summary 
 
 This document provides the R code used to summarize the market research done by students at ULB/Sovay Brussels School on citizen initiatives and, in particular, civic crowdfunding. This research originated from a need by BrusselsTogether to better understand the factors driving the success of their own civic crowdfunding platform.
 
@@ -33,7 +33,9 @@ The present document provides all of the code written in R in order for anyone t
 
 The input files can be retrieved on our [Github page](https://github.com/antoinemercier82/BrusselsTogether-Mkg-Analytics-Solvay-BS-2018).
 
-## Preparations 
+# Data preprocessing
+
+### Preparation
 
 ```{r loading_packages, message = FALSE, warning = FALSE}
 library(readr)
@@ -53,9 +55,7 @@ library(ggthemes)
 library(tibble)
 ```
 
-## Analysis
-
-### Data
+### Import
 
 There are only two input files (`Citizen initiative.csv` and  `header_lookup.txt`) which can be retrieved from the Github page mentionned above.
 
@@ -462,10 +462,15 @@ survey_df_j <- survey_df_e_j %>% bind_rows(survey_df_c_j)
 
 survey_df_j$resp_type <- factor(survey_df_j$resp_type,
                                 levels = c("Entrepreneur", "Citizen"))
+
+survey_df_c$invest <- factor(survey_df_c$invest, ordered = TRUE,
+                             levels = c("", "0", "1_99", "100_199",
+                                        "200_499", "500_plus"))
+
 ```
 
 
-### Results
+# Analysis
 
 Now that we have imported and cleaned the data, we can start doing some exploratory analysis.
 
@@ -475,7 +480,7 @@ We have split the data into three tables:
 * `survey_df_c` which contains the responses from the citizens.
 * `survey_df_j` which contains the responses from both the social entrepreneurs and citizens and from which the likert scale questions have been removed.
 
-#### Composition of respondants
+### Composition of respondants
 
 We can create a bar plot showing the composition of respondants using `survey_df_j` as follows:
 
@@ -487,7 +492,11 @@ survey_df_j %>%
   labs(title = "Composition of respondants",
        subtitle = "This is a subtitle") +
   theme_ipsum_rc() +
-  scale_fill_ipsum()
+  scale_fill_ipsum() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank())
 ```
 
 The corresponding table with the values is given here:
@@ -504,45 +513,9 @@ addmargins(table(survey_df_e$language, survey_df_e$gender) %>%
 
 ```
 
-#### Likert plot for citizens/partivipative questions
+### Likert plot for citizens/partivipative questions
 
-Let's have a look at the likert scale questions.
-fig.height = 4, fig.width = 10
-
-```{r fig.height = 4, fig.width = 10}
-questions_c <- header_lookup$google_f_header[17:27]
-quest_code_c <- names(survey_df_c)[5:15]
-survey_df_c_df <- as.data.frame(survey_df_c)
-names(survey_df_c_df)[5:15] <- questions_c
-
-likert_out_c_p <- likert(survey_df_c_df[,5:9])
-
-plot(likert_out_c_p)
-```
-
-#### Likert plot for citizens/government questions
-
-```{r fig.height = 4, fig.width = 10}
-likert_out_c_g <- likert(survey_df_c_df[,10:15])
-
-plot(likert_out_c_g)
-```
-
-
-```{r fig.height = 15, fig.width = 10}
-likert_out_c_p_group <- likert(survey_df_c_df[,5:9],
-                               grouping = survey_df_c_df$interest)
-# plot(likert_out_c_p_group)
-# plot(likert_out_c_p_group,
-#      group.order = c("Not_interested",
-#                      "Could_be_interested_Vol",
-#                      "Could_be_interested_Fund",
-#                      "Is_ready_Vol",
-#                      "Is_ready_Fund") +
-#        theme(text = element_text(size = 14)))
-```
-
-#### Custom likert plot for citizens/government questions
+Let's have a look at the likert scale questions. The first code chunk below defines the function used to plot the results of the likert scale questions.
 
 ```{r}
 lik_plot <- function(t, my_df_names, mylevels, factor_levels, p_title) {
@@ -586,9 +559,9 @@ lik_plot <- function(t, my_df_names, mylevels, factor_levels, p_title) {
   tab3 <- melt(tab2, id = "outcome")
   tab3$col <- rep(pal, each = temp.rows)
   tab3$value <- tab3$value * 100
-  tab3$outcome <- str_wrap(tab3$outcome, width = 60)
+  tab3$outcome <- str_wrap(tab3$outcome, width = 70)
   tab3$outcome <- factor(tab3$outcome, ordered = T,
-                         levels = str_wrap(factor_levels, width = 60))
+                         levels = str_wrap(factor_levels, width = 70))
   highs <- na.omit(tab3[(length(tab3[,1]) / 2) + 1:length(tab3[,1]),])
   lows <- na.omit(tab3[1:(length(tab3[,1]) / 2),])
   lows <- lows[rev(rownames(lows)),]
@@ -621,11 +594,51 @@ lik_plot <- function(t, my_df_names, mylevels, factor_levels, p_title) {
     theme(axis.text.y = element_text(hjust = 0)) +
     theme(legend.position = "bottom") +
     scale_y_continuous(breaks = seq(-100,100,25), limits = c(-100,100), labels = function(x) paste0(x, "%")) +
-    theme(plot.margin = unit(c(1,1,1,0), "cm"))
+    theme(plot.margin = unit(c(1,1,1,0), "cm")) +
+    theme(panel.grid.major.x = element_blank(),
+          panel.grid.minor.x = element_blank(),
+          panel.grid.major.y = element_blank(),
+          panel.grid.minor.y = element_blank())
 }
 ```
 
-```{r fig.height = 6, fig.width = 10, fig.align = "center"}
+```{r fig.height = 5.5, fig.width = 10, fig.align = "center"}
+questions_c <- header_lookup$google_f_header[17:27]
+quest_code_c <- names(survey_df_c)[5:15]
+survey_df_c_df <- as.data.frame(survey_df_c)
+names(survey_df_c_df)[5:15] <- questions_c
+
+
+
+my_df_names_c_p <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
+                     "Agree", "Strongly agree")
+mylevels_c_p <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
+                  "Agree", "Strongly agree")
+factor_levels_c_p <- c("Personally funding a citizen's initiative is enough to satisfy my desire to engage in this project.",
+                       "I would like to participate in debates on local public issues.",
+                       "It is relatively easy for citizens to find places where local public issues are collectively debated.",
+                       "I would be more inclined to contribute financially to a project on a civic crowdfunding platform if I had the possibility to express my disagreement about some aspects of the project.",
+                       "Face-to-face interactions are necessary for collective action.")
+
+temp_c_p <- survey_df_c_df[,5:9]
+
+temp_c_p_gathered <- temp_c_p %>% 
+  gather(key = "question", value = "answer")
+
+temp_c_p_gathered$answer <- factor(temp_c_p_gathered$answer, ordered = T,
+                                   levels = mylevels_c_p)
+
+t_c_p <- prop.table(table(temp_c_p_gathered$question,
+                          temp_c_p_gathered$answer), 1)
+c_p_title <- "\n\nCitizens - Participative questions\n"
+
+lik_plot(t_c_p, my_df_names_c_p, mylevels_c_p, factor_levels_c_p, c_p_title)
+```
+
+### Likert plot for citizens/government questions
+
+
+```{r fig.height = 5.5, fig.width = 10, fig.align = "center"}
 my_df_names_c_g <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
                  "Agree", "Strongly agree")
 mylevels_c_g <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
@@ -652,9 +665,9 @@ c_g_title <- "Citizens - Government questions\n"
 lik_plot(t_c_g, my_df_names_c_g, mylevels_c_g, factor_levels_c_g, c_g_title)
 ```
 
-####  Custom likert plots for citizens/participative questions grouped by interest
+###  Likert plots for citizens/participative questions grouped by interest
 
-```{r fig.height = 3.75, fig.width = 10, fig.align = "center"}
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
 my_df_names <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
                  "Agree", "Strongly agree")
 mylevels <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
@@ -666,37 +679,197 @@ factor_levels <- c("Not_interested",
                    "Is_ready_Fund")
 
 t_p1 <- prop.table(table(survey_df_c$interest, survey_df_c$p1), 1)
-p1_title <- "Personally funding a citizen's initiative is enough to\nsatisfy my desire to engage in this project.\n"
+p1_title <- "\nPersonally funding a citizen's initiative is enough to\nsatisfy my desire to engage in this project.\n"
 
 lik_plot(t_p1, my_df_names, mylevels, factor_levels, p1_title)
 ```
 
-```{r fig.height = 3.75, fig.width = 10, fig.align = "center"}
-lik_plot(t_p1, my_df_names, mylevels, factor_levels, p1_title)
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
 t_p2 <- prop.table(table(survey_df_c$interest, survey_df_c$p2), 1)
-p2_title <- "I would like to participate in debates on local public issues.\n"
+p2_title <- "\n\nI would like to participate in debates on local public issues.\n"
 
 lik_plot(t_p2, my_df_names, mylevels, factor_levels, p2_title)
 ```
 
-```{r fig.height = 3.9, fig.width = 10, fig.align = "center"}
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
 t_p3 <- prop.table(table(survey_df_c$interest, survey_df_c$p3), 1)
-p3_title <- "It is relatively easy for citizens to find places where\nlocal public issues are collectively debated.\n"
+p3_title <- "\nIt is relatively easy for citizens to find places where\nlocal public issues are collectively debated.\n"
 
 lik_plot(t_p3, my_df_names, mylevels, factor_levels, p3_title)
 ```
 
-```{r fig.height = 4.05, fig.width = 10, fig.align = "center"}
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
 t_p4 <- prop.table(table(survey_df_c$interest, survey_df_c$p4), 1)
 p4_title <- "I would be more inclined to contribute financially to\na project on a civic crowdfunding platform if I had the possibility\nto express my disagreement about some aspects of the project.\n"
 
 lik_plot(t_p4, my_df_names, mylevels, factor_levels, p4_title)
 ```
 
-```{r fig.height = 3.75, fig.width = 10, fig.align = "center"}
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
 t_p5 <- prop.table(table(survey_df_c$interest, survey_df_c$p5), 1)
-p5_title <- "Face-to-face interactions are necessary for collective action.\n"
+p5_title <- "\n\nFace-to-face interactions are necessary for collective action.\n"
 
 lik_plot(t_p5, my_df_names, mylevels, factor_levels, p5_title)
 ```
 
+
+###  Likert plots for citizens/government questions grouped by interest
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+my_df_names <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
+                 "Agree", "Strongly agree")
+mylevels <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
+              "Agree", "Strongly agree")
+factor_levels <- c("Not_interested",
+                   "Could_be_interested_Vol",
+                   "Could_be_interested_Fund",
+                   "Is_ready_Vol",
+                   "Is_ready_Fund")
+
+t_g1 <- prop.table(table(survey_df_c$interest, survey_df_c$g1), 1)
+g1_title <- "\n\nCivic crowdfunding represents a direct threat to public funding of services.\n"
+
+lik_plot(t_g1, my_df_names, mylevels, factor_levels, g1_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_g2 <- prop.table(table(survey_df_c$interest, survey_df_c$g2), 1)
+g2_title <- "\nI regard crowdfunded citizen's initiatives as\na sort of _Do-It-Yourself government_.\n"
+
+lik_plot(t_g2, my_df_names, mylevels, factor_levels, g2_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_g3 <- prop.table(table(survey_df_c$interest, survey_df_c$g3), 1)
+g3_title <- "\nThe local government is able to identify\nthe projects that are most wanted by citizens.\n"
+
+lik_plot(t_g3, my_df_names, mylevels, factor_levels, g3_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_g4 <- prop.table(table(survey_df_c$interest, survey_df_c$g4), 1)
+g4_title <- "\nCivic crowdfunding platforms could play a role of\nintermediary between citizen's initiatives and the local government.\n"
+
+lik_plot(t_g4, my_df_names, mylevels, factor_levels, g4_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_g5 <- prop.table(table(survey_df_c$interest, survey_df_c$g5), 1)
+g5_title <- "\nGeneral interest issues are addressed more efficiently\nby crowdfunded citizen's initiatives than by the local government.\n"
+
+lik_plot(t_g5, my_df_names, mylevels, factor_levels, g5_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_g6 <- prop.table(table(survey_df_c$interest, survey_df_c$g6), 1)
+g6_title <- "General interest issues are addressed more efficiently\nby crowdfunded citizen's initiatives than by\nnon-profit organizations subsidized by the local government.\n"
+
+lik_plot(t_g6, my_df_names, mylevels, factor_levels, g6_title)
+```
+
+
+###  Likert plots for citizens/participative questions grouped by past investment
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+my_df_names_c_inv <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
+                 "Agree", "Strongly agree")
+mylevels_c_inv <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
+              "Agree", "Strongly agree")
+factor_levels_c_inv <- c("0",
+                         "1_99",
+                         "100_199",
+                         "200_499",
+                         "500_plus")
+
+survey_df_c_inv <- survey_df_c %>% 
+  filter(invest != "")
+
+t_p1 <- prop.table(table(survey_df_c_inv$invest, survey_df_c_inv$p1), 1)
+p1_title <- "\nPersonally funding a citizen's initiative is enough to\nsatisfy my desire to engage in this project.\n"
+
+lik_plot(t_p1, my_df_names_c_inv, mylevels_c_inv,
+         factor_levels_c_inv, p1_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_p2 <- prop.table(table(survey_df_c_inv$invest, survey_df_c_inv$p2), 1)
+p2_title <- "\n\nI would like to participate in debates on local public issues.\n"
+
+lik_plot(t_p2, my_df_names_c_inv, mylevels_c_inv,
+         factor_levels_c_inv, p2_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_p3 <- prop.table(table(survey_df_c_inv$invest, survey_df_c_inv$p3), 1)
+p3_title <- "\nIt is relatively easy for citizens to find places where\nlocal public issues are collectively debated.\n"
+
+lik_plot(t_p3, my_df_names_c_inv, mylevels_c_inv,
+         factor_levels_c_inv, p3_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_p4 <- prop.table(table(survey_df_c_inv$invest, survey_df_c_inv$p4), 1)
+p4_title <- "I would be more inclined to contribute financially to\na project on a civic crowdfunding platform if I had the possibility\nto express my disagreement about some aspects of the project.\n"
+
+lik_plot(t_p4, my_df_names_c_inv, mylevels_c_inv,
+         factor_levels_c_inv, p4_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_p5 <- prop.table(table(survey_df_c_inv$invest, survey_df_c_inv$p5), 1)
+p5_title <- "\nFace-to-face interactions are necessary for collective action.\n"
+
+lik_plot(t_p1, my_df_names_c_inv, mylevels_c_inv,
+         factor_levels_c_inv, p1_title)
+```
+
+
+###  Likert plots for citizens/government questions grouped by past investment
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_g1 <- prop.table(table(survey_df_c_inv$invest, survey_df_c_inv$g1), 1)
+g1_title <- "\n\nCivic crowdfunding represents a direct threat to public funding of services.\n"
+
+lik_plot(t_g1, my_df_names_c_inv, mylevels_c_inv,
+         factor_levels_c_inv, g1_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_g2 <- prop.table(table(survey_df_c_inv$invest, survey_df_c_inv$g2), 1)
+g2_title <- "\nI regard crowdfunded citizen's initiatives as\na sort of _Do-It-Yourself government_.\n"
+
+lik_plot(t_g2, my_df_names_c_inv, mylevels_c_inv,
+         factor_levels_c_inv, g2_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_g3 <- prop.table(table(survey_df_c_inv$invest, survey_df_c_inv$g3), 1)
+g3_title <- "\nThe local government is able to identify\nthe projects that are most wanted by citizens.\n"
+
+lik_plot(t_g3, my_df_names_c_inv, mylevels_c_inv,
+         factor_levels_c_inv, g3_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_g4 <- prop.table(table(survey_df_c_inv$invest, survey_df_c_inv$g4), 1)
+g4_title <- "\nCivic crowdfunding platforms could play a role of\nintermediary between citizen's initiatives and the local government.\n"
+
+lik_plot(t_g4, my_df_names_c_inv, mylevels_c_inv,
+         factor_levels_c_inv, g4_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_g5 <- prop.table(table(survey_df_c_inv$invest, survey_df_c_inv$g5), 1)
+g5_title <- "\nGeneral interest issues are addressed more efficiently\nby crowdfunded citizen's initiatives than by the local government.\n"
+
+lik_plot(t_p1, my_df_names_c_inv, mylevels_c_inv,
+         factor_levels_c_inv, p1_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_g6 <- prop.table(table(survey_df_c_inv$invest, survey_df_c_inv$g6), 1)
+g6_title <- "General interest issues are addressed more efficiently\nby crowdfunded citizen's initiatives than by\nnon-profit organizations subsidized by the local government.\n"
+
+lik_plot(t_g6, my_df_names_c_inv, mylevels_c_inv,
+         factor_levels_c_inv, g6_title)
+```
