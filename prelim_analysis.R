@@ -23,7 +23,6 @@ header_lookup <- read_delim("inputs/header_lookup.txt", delim = ";")
 # names(survey_df) <- header_lookup$df_header
 
 
-
 # Dates preprocessing
 survey_df$date <- str_replace(string = survey_df$date,
                               pattern = "M GMT.*$",
@@ -430,17 +429,89 @@ survey_df_j %>%
 
 
 
-header_lookup$df_header
-which(header_lookup$df_header == "c_p1_eng")
-which(header_lookup$df_header == "c_g6_eng")
 
-which(names(survey_df_c) == "p1")
-which(names(survey_df_c) == "g6")
 
-questions_c <- header_lookup$google_f_header[17:27]
-quest_code_c <- names(survey_df_c)[5:15]
-survey_df_c_df <- as.data.frame(survey_df_c)
-names(survey_df_c_df)[5:15] <- questions_c
+
+lik_plot <- function(t, my_df_names, mylevels, factor_levels, p_title) {
+  tab <- rownames_to_column(data.frame(unclass(t)), "rownames_col")
+  names(tab) <- my_df_names
+  tab$interest <- factor(tab$interest, ordered = T, levels = factor_levels)
+  
+  numlevels <- length(tab[1,]) - 1
+  numcenter <- ceiling(numlevels / 2) + 1
+  tab$midvalues <- tab[,numcenter] / 2
+  tab2 <- cbind(tab[,1],
+                tab[,2:ceiling(numlevels / 2)],
+                tab$midvalues,
+                tab$midvalues,
+                tab[,numcenter:numlevels + 1])
+  
+  colnames(tab2) <- c("outcome",
+                      mylevels[1:floor(numlevels / 2)],
+                      "midlow",
+                      "midhigh",
+                      mylevels[numcenter:numlevels])
+  
+  numlevels <- length(mylevels) + 1
+  point1 <- 2
+  point2 <- ((numlevels) / 2) + 1
+  point3 <- point2 + 1
+  point4 <- numlevels + 1
+  mymin <- (ceiling(max(rowSums(tab2[,point1:point2])) * 4) / 4) * -100
+  mymax <- (ceiling(max(rowSums(tab2[,point3:point4])) * 4) / 4) * 100
+  
+  numlevels <- length(tab[1,]) - 1
+  temp.rows <- length(tab2[,1])
+  pal <- brewer.pal((numlevels - 1),"BrBG")
+  pal[ceiling(numlevels / 2)] <- "#DFDFDF"
+  legend.pal <- pal
+  pal <- c(pal[1:(ceiling(numlevels / 2) - 1)],
+           pal[ceiling(numlevels / 2)],
+           pal[ceiling(numlevels / 2)],
+           pal[(ceiling(numlevels / 2) + 1):(numlevels - 1)])
+  
+  tab3 <- melt(tab2, id = "outcome")
+  tab3$col <- rep(pal, each = temp.rows)
+  tab3$value <- tab3$value * 100
+  tab3$outcome <- str_wrap(tab3$outcome, width = 60)
+  tab3$outcome <- factor(tab3$outcome, ordered = T,
+                         levels = str_wrap(factor_levels, width = 60))
+  highs <- na.omit(tab3[(length(tab3[,1]) / 2) + 1:length(tab3[,1]),])
+  lows <- na.omit(tab3[1:(length(tab3[,1]) / 2),])
+  lows <- lows[rev(rownames(lows)),]
+  
+  highs$col <- factor(highs$col, ordered = T, levels = c("#018571",
+                                                         "#80CDC1",
+                                                         "#DFDFDF"))
+  lows$col <- factor(lows$col, ordered = T, levels = c("#A6611A",
+                                                       "#DFC27D",
+                                                       "#DFDFDF"))
+  
+  highs$outcome <- factor(highs$outcome, ordered = T,
+                          levels = rev(levels(highs$outcome)))
+  lows$outcome <- factor(lows$outcome, ordered = T,
+                         levels = rev(levels(lows$outcome)))
+  
+  # lows$outcome
+  # highs$outcome <- factor(highs$outcome, ordered = T,
+  #                        levels = tab2$outcome[order(-(tab2[,5] + tab2[,6] + tab2[,7]))])
+  
+  ggplot() +
+    geom_bar(data = highs, aes(x = outcome, y = value, fill = col), position = "stack", stat = "identity") +
+    geom_bar(data = lows, aes(x = outcome, y = -value, fill = col), position = "stack", stat = "identity") +
+    geom_hline(yintercept = 0, color = c("white")) +
+    scale_fill_identity("Percent", labels = mylevels, breaks = legend.pal, guide = "legend") + 
+    theme_fivethirtyeight() +
+    coord_flip() +
+    theme_ipsum_rc() +
+    labs(title = p_title, y = "",x = "") +
+    theme(plot.title = element_text(size = 14, hjust = 0.5)) +
+    theme(axis.text.y = element_text(hjust = 0)) +
+    theme(legend.position = "bottom") +
+    scale_y_continuous(breaks = seq(-100,100,25), limits = c(-100,100), labels = function(x) paste0(x, "%")) +
+    theme(plot.margin = unit(c(1,1,1,0), "cm"))
+}
+
 
 
 header_lookup$df_header
@@ -455,54 +526,64 @@ quest_code_e <- names(survey_df_e)[5:15]
 survey_df_e_df <- as.data.frame(survey_df_e)
 names(survey_df_e_df)[5:15] <- questions_e
 
-# 
-# glimpse(survey_df_c)
-# 
-# levels(survey_df_c$`Personally funding a citizen's initiative is enough to satisfy my desire to engage in this project.`)
-# levels(survey_df_c$`I would like to participate in debates on local public issues.`)
-# levels(survey_df_c$`It is relatively easy for citizens to find places where local public issues are collectively debated.`)
-# levels(survey_df_c$`I would be more inclined to contribute financially to a project on a civic crowdfunding platform if I had the possibility to express my disagreement about some aspects of the project.`)
-# levels(survey_df_c$`Face-to-face interactions are necessary for collective action.`)
-
-likert_out_c_p <- likert(survey_df_c_df[,5:9])
-
-plot(likert_out_c_p)
-
-likert_out_c_g <- likert(survey_df_c_df[,10:15])
-
-plot(likert_out_c_g)
-
-# likert_out_c_p_group <- likert(survey_df_c_df[,5:9],
-#                                grouping = survey_df_c_df$interest)
-# 
-# plot(likert_out_c_p_group,
-#      group.order = c("Not_interested",
-#                      "Could_be_interested_Vol",
-#                      "Could_be_interested_Fund",
-#                      "Is_ready_Vol",
-#                      "Is_ready_Fund") +
-#        theme(text = element_text(size = 14)))
 
 
 
+header_lookup$df_header
+which(header_lookup$df_header == "c_p1_eng")
+which(header_lookup$df_header == "c_g6_eng")
+
+which(names(survey_df_c) == "p1")
+which(names(survey_df_c) == "g6")
+
+questions_c <- header_lookup$google_f_header[17:27]
+quest_code_c <- names(survey_df_c)[5:15]
+survey_df_c_df <- as.data.frame(survey_df_c)
+names(survey_df_c_df)[5:15] <- questions_c
 
 my_df_names <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
                  "Agree", "Strongly agree")
-
 mylevels <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
               "Agree", "Strongly agree")
-
 factor_levels <- c("Not_interested",
                    "Could_be_interested_Vol",
                    "Could_be_interested_Fund",
                    "Is_ready_Vol",
                    "Is_ready_Fund")
 
-t <- prop.table(table(survey_df_c$interest, survey_df_c$p1), 1)
+temp_c_p <- survey_df_c_df[,5:9]
 
-tab <- rownames_to_column(data.frame(unclass(t)), "rownames_col")
-names(tab) <- my_df_names
-tab$interest <- factor(tab$interest, ordered = T, levels = factor_levels)
+
+
+
+my_df_names_c_g <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
+                 "Agree", "Strongly agree")
+mylevels_c_g <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
+              "Agree", "Strongly agree")
+factor_levels_c_g <- c("Civic crowdfunding represents a direct threat to public funding of services.",
+                       "I regard crowdfunded citizen's initiatives as a sort of _Do-It-Yourself government_.",
+                       "The local government is able to identify the projects that are most wanted by citizens.",
+                       "Civic crowdfunding platforms could play a role of intermediary between citizen's initiatives and the local government.",
+                       "General interest issues are addressed more efficiently by crowdfunded citizen's initiatives than by the local government.",
+                       "General interest issues are addressed more efficiently by crowdfunded citizen's initiatives than by non-profit organizations subsidized by the local government.")
+
+temp_c_g <- survey_df_c_df[,10:15]
+
+temp_c_g_gathered <- temp_c_g %>% 
+  gather(key = "question", value = "answer")
+
+temp_c_g_gathered$answer <- factor(temp_c_g_gathered$answer, ordered = T,
+                                   levels = mylevels_c_g)
+
+t_c_g <- prop.table(table(temp_c_g_gathered$question,
+                          temp_c_g_gathered$answer), 1)
+c_g_title <- "Citizens - Government questions\n"
+
+
+
+tab <- rownames_to_column(data.frame(unclass(t_c_g)), "rownames_col")
+names(tab) <- my_df_names_c_g
+tab$interest <- factor(tab$interest, ordered = T, levels = factor_levels_c_g)
 
 numlevels <- length(tab[1,]) - 1
 numcenter <- ceiling(numlevels / 2) + 1
@@ -514,12 +595,12 @@ tab2 <- cbind(tab[,1],
               tab[,numcenter:numlevels + 1])
 
 colnames(tab2) <- c("outcome",
-                    mylevels[1:floor(numlevels / 2)],
+                    mylevels_c_g[1:floor(numlevels / 2)],
                     "midlow",
                     "midhigh",
-                    mylevels[numcenter:numlevels])
+                    mylevels_c_g[numcenter:numlevels])
 
-numlevels <- length(mylevels) + 1
+numlevels <- length(mylevels_c_g) + 1
 point1 <- 2
 point2 <- ((numlevels) / 2) + 1
 point3 <- point2 + 1
@@ -529,7 +610,7 @@ mymax <- (ceiling(max(rowSums(tab2[,point3:point4])) * 4) / 4) * 100
 
 numlevels <- length(tab[1,]) - 1
 temp.rows <- length(tab2[,1])
-pal <- brewer.pal((numlevels - 1),"RdBu")
+pal <- brewer.pal((numlevels - 1),"BrBG")
 pal[ceiling(numlevels / 2)] <- "#DFDFDF"
 legend.pal <- pal
 pal <- c(pal[1:(ceiling(numlevels / 2) - 1)],
@@ -540,32 +621,84 @@ pal <- c(pal[1:(ceiling(numlevels / 2) - 1)],
 tab3 <- melt(tab2, id = "outcome")
 tab3$col <- rep(pal, each = temp.rows)
 tab3$value <- tab3$value * 100
-tab3$outcome <- str_wrap(tab3$outcome, width = 40)
-tab3$outcome <- factor(tab3$outcome, ordered = T, levels = factor_levels)
+tab3$outcome <- str_wrap(tab3$outcome, width = 60)
+tab3$outcome <- factor(tab3$outcome, ordered = T,
+                       levels = str_wrap(factor_levels_c_g, width = 60))
 highs <- na.omit(tab3[(length(tab3[,1]) / 2) + 1:length(tab3[,1]),])
 lows <- na.omit(tab3[1:(length(tab3[,1]) / 2),])
 lows <- lows[rev(rownames(lows)),]
 
-highs$col <- factor(highs$col, ordered = T, levels = c("#0571B0",
-                                                       "#92C5DE",
+highs$col <- factor(highs$col, ordered = T, levels = c("#018571",
+                                                       "#80CDC1",
                                                        "#DFDFDF"))
-lows$col <- factor(lows$col, ordered = T, levels = c("#CA0020",
-                                                     "#F4A582",
+lows$col <- factor(lows$col, ordered = T, levels = c("#A6611A",
+                                                     "#DFC27D",
                                                      "#DFDFDF"))
 # lows$outcome
 # highs$outcome <- factor(highs$outcome, ordered = T,
 #                        levels = tab2$outcome[order(-(tab2[,5] + tab2[,6] + tab2[,7]))])
 
+highs$outcome <- factor(highs$outcome, ordered = T,
+                        levels = rev(levels(highs$outcome)))
+lows$outcome <- factor(lows$outcome, ordered = T,
+                        levels = rev(levels(lows$outcome)))
+
 ggplot() +
   geom_bar(data = highs, aes(x = outcome, y = value, fill = col), position = "stack", stat = "identity") +
   geom_bar(data = lows, aes(x = outcome, y = -value, fill = col), position = "stack", stat = "identity") +
   geom_hline(yintercept = 0, color = c("white")) +
-  scale_fill_identity("Percent", labels = mylevels, breaks = legend.pal, guide = "legend") + 
+  scale_fill_identity("Percent", labels = mylevels_c_g, breaks = legend.pal, guide = "legend") + 
   theme_fivethirtyeight() +
   coord_flip() +
   theme_ipsum_rc() +
-  labs(title = "Personally funding a citizen's initiative is enough to\nsatisfy my desire to engage in this project.\n", y = "",x = "") +
+  labs(title = c_g_title, y = "",x = "") +
   theme(plot.title = element_text(size = 14, hjust = 0.5)) +
   theme(axis.text.y = element_text(hjust = 0)) +
   theme(legend.position = "bottom") +
-  scale_y_continuous(breaks = seq(-100,100,25), limits = c(-100,100), labels = function(x) paste0(x, "%"))
+  scale_y_continuous(breaks = seq(-100,100,25), limits = c(-100,100), labels = function(x) paste0(x, "%")) +
+  theme(plot.margin = unit(c(1,1,1,0), "cm")) +
+  coord_equal(ratio = .2) +
+  coord_flip()
+
+
+lik_plot(t_c_g, my_df_names_c_g, mylevels_c_g, factor_levels_c_g, c_g_title)
+
+
+
+
+
+my_df_names <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
+                 "Agree", "Strongly agree")
+mylevels <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
+              "Agree", "Strongly agree")
+factor_levels <- c("Not_interested",
+                   "Could_be_interested_Vol",
+                   "Could_be_interested_Fund",
+                   "Is_ready_Vol",
+                   "Is_ready_Fund")
+
+t_p1 <- prop.table(table(survey_df_c$interest, survey_df_c$p1), 1)
+p1_title <- "Personally funding a citizen's initiative is enough to\nsatisfy my desire to engage in this project.\n"
+
+lik_plot(t_p1, my_df_names, mylevels, factor_levels, p1_title)
+
+t_p2 <- prop.table(table(survey_df_c$interest, survey_df_c$p2), 1)
+p2_title <- "I would like to participate in debates on local public issues.\n"
+
+lik_plot(t_p2, my_df_names, mylevels, factor_levels, p2_title)
+
+t_p3 <- prop.table(table(survey_df_c$interest, survey_df_c$p3), 1)
+p3_title <- "It is relatively easy for citizens to find places where\nlocal public issues are collectively debated.\n"
+
+lik_plot(t_p3, my_df_names, mylevels, factor_levels, p3_title)
+
+t_p4 <- prop.table(table(survey_df_c$interest, survey_df_c$p4), 1)
+p4_title <- "I would be more inclined to contribute financially to\na project on a civic crowdfunding platform if I had the possibility\nto express my disagreement about some aspects of the project.\n"
+
+lik_plot(t_p4, my_df_names, mylevels, factor_levels, p4_title)
+
+t_p5 <- prop.table(table(survey_df_c$interest, survey_df_c$p5), 1)
+p5_title <- "Face-to-face interactions are necessary for collective action.\n"
+
+lik_plot(t_p5, my_df_names, mylevels, factor_levels, p5_title)
+

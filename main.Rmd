@@ -9,9 +9,10 @@ output:
     fig_height: 5
     theme: simplex
     toc: yes
-    toc_float: 
-      collapsed: false
-      smooth_scroll: false
+    toc_depth: 4
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
 ---
 
 ```{r setup, include=FALSE}
@@ -474,6 +475,8 @@ We have split the data into three tables:
 * `survey_df_c` which contains the responses from the citizens.
 * `survey_df_j` which contains the responses from both the social entrepreneurs and citizens and from which the likert scale questions have been removed.
 
+#### Composition of respondants
+
 We can create a bar plot showing the composition of respondants using `survey_df_j` as follows:
 
 ```{r fig.height = 6, fig.width = 10, fig.align = "center"}
@@ -501,6 +504,8 @@ addmargins(table(survey_df_e$language, survey_df_e$gender) %>%
 
 ```
 
+#### Likert plot for citizens/partivipative questions
+
 Let's have a look at the likert scale questions.
 fig.height = 4, fig.width = 10
 
@@ -513,11 +518,16 @@ names(survey_df_c_df)[5:15] <- questions_c
 likert_out_c_p <- likert(survey_df_c_df[,5:9])
 
 plot(likert_out_c_p)
+```
 
+#### Likert plot for citizens/government questions
+
+```{r fig.height = 4, fig.width = 10}
 likert_out_c_g <- likert(survey_df_c_df[,10:15])
 
 plot(likert_out_c_g)
 ```
+
 
 ```{r fig.height = 15, fig.width = 10}
 likert_out_c_p_group <- likert(survey_df_c_df[,5:9],
@@ -531,6 +541,8 @@ likert_out_c_p_group <- likert(survey_df_c_df[,5:9],
 #                      "Is_ready_Fund") +
 #        theme(text = element_text(size = 14)))
 ```
+
+#### Custom likert plot for citizens/government questions
 
 ```{r}
 lik_plot <- function(t, my_df_names, mylevels, factor_levels, p_title) {
@@ -574,9 +586,9 @@ lik_plot <- function(t, my_df_names, mylevels, factor_levels, p_title) {
   tab3 <- melt(tab2, id = "outcome")
   tab3$col <- rep(pal, each = temp.rows)
   tab3$value <- tab3$value * 100
-  tab3$outcome <- str_wrap(tab3$outcome, width = 40)
+  tab3$outcome <- str_wrap(tab3$outcome, width = 60)
   tab3$outcome <- factor(tab3$outcome, ordered = T,
-                         levels = str_wrap(factor_levels, width = 40))
+                         levels = str_wrap(factor_levels, width = 60))
   highs <- na.omit(tab3[(length(tab3[,1]) / 2) + 1:length(tab3[,1]),])
   lows <- na.omit(tab3[1:(length(tab3[,1]) / 2),])
   lows <- lows[rev(rownames(lows)),]
@@ -587,6 +599,11 @@ lik_plot <- function(t, my_df_names, mylevels, factor_levels, p_title) {
   lows$col <- factor(lows$col, ordered = T, levels = c("#A6611A",
                                                        "#DFC27D",
                                                        "#DFDFDF"))
+  
+  highs$outcome <- factor(highs$outcome, ordered = T,
+                          levels = rev(levels(highs$outcome)))
+  lows$outcome <- factor(lows$outcome, ordered = T,
+                         levels = rev(levels(lows$outcome)))
   # lows$outcome
   # highs$outcome <- factor(highs$outcome, ordered = T,
   #                        levels = tab2$outcome[order(-(tab2[,5] + tab2[,6] + tab2[,7]))])
@@ -603,11 +620,12 @@ lik_plot <- function(t, my_df_names, mylevels, factor_levels, p_title) {
     theme(plot.title = element_text(size = 14, hjust = 0.5)) +
     theme(axis.text.y = element_text(hjust = 0)) +
     theme(legend.position = "bottom") +
-    scale_y_continuous(breaks = seq(-100,100,25), limits = c(-100,100), labels = function(x) paste0(x, "%"))
+    scale_y_continuous(breaks = seq(-100,100,25), limits = c(-100,100), labels = function(x) paste0(x, "%")) +
+    theme(plot.margin = unit(c(1,1,1,0), "cm"))
 }
 ```
 
-```{r fig.height = 8, fig.width = 10, fig.align = "center"}
+```{r fig.height = 6, fig.width = 10, fig.align = "center"}
 my_df_names_c_g <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
                  "Agree", "Strongly agree")
 mylevels_c_g <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
@@ -624,6 +642,9 @@ temp_c_g <- survey_df_c_df[,10:15]
 temp_c_g_gathered <- temp_c_g %>% 
   gather(key = "question", value = "answer")
 
+temp_c_g_gathered$answer <- factor(temp_c_g_gathered$answer, ordered = T,
+                                   levels = mylevels_c_g)
+
 t_c_g <- prop.table(table(temp_c_g_gathered$question,
                           temp_c_g_gathered$answer), 1)
 c_g_title <- "Citizens - Government questions\n"
@@ -631,6 +652,7 @@ c_g_title <- "Citizens - Government questions\n"
 lik_plot(t_c_g, my_df_names_c_g, mylevels_c_g, factor_levels_c_g, c_g_title)
 ```
 
+####  Custom likert plots for citizens/participative questions grouped by interest
 
 ```{r fig.height = 3.75, fig.width = 10, fig.align = "center"}
 my_df_names <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
