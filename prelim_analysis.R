@@ -11,6 +11,7 @@ library(reshape2)
 library(RColorBrewer)
 library(ggthemes)
 library(tibble)
+library(broom)
 # update_geom_font_defaults(family = font_rc_light)
 
 # options(device = "CairoWin")
@@ -425,7 +426,6 @@ survey_df_c$grouping <- factor(survey_df_c$grouping, ordered = TRUE,
                                levels = c("Citizen_not_active",
                                           "Citizen_casual_vol"))
 
-unique(survey_df_c$grouping)
 survey_df_c$interest <- factor(survey_df_c$interest, ordered = TRUE,
                                   levels = c("Not_interested",
                                              "Could_be_interested_Vol",
@@ -989,16 +989,8 @@ survey_df_c_mat <- survey_df_c %>%
   filter(gender %in% c("Female", "Male")) %>% 
   select(language:edu) %>% 
   data.matrix() %>% 
-  as_data_frame()
-
-nrow(survey_df_c_mat)
-names(survey_df_c)
-
-class(survey_df_c_mat)
-survey_df_c_mat <- survey_df_c_mat %>% 
-  mutate(male = gender == 2)
-
-survey_df_c_mat$male <- as.numeric(survey_df_c_mat$male)
+  as_data_frame() %>% 
+  mutate(male = as.numeric(gender == 2))
 
 survey_df_c_mat[1:10,]
 
@@ -1022,7 +1014,12 @@ sfit <- standardizedsolution(fit)
 sfit %>% 
   filter(op == "=~")
 
-fitmeasures(fit, c("npar", "chisq", "df", "cfi", "rmsea", "srmr"))
+x <- fitmeasures(fit, c("npar", "chisq", "df", "cfi", "rmsea", "srmr"))
+
+cbind(read.table(text = names(x)), x)
+
+# %>% 
+#   as_data_frame()
 
 inspect(fit, "r2")
 
@@ -1110,7 +1107,13 @@ inspect(fit4, "sampstat")
 
 anova(fit2, fit4)
 
+x <- fitmeasures(fit, c("npar", "chisq", "df", "cfi", "rmsea", "srmr"))
 
+options(scipen = 999, digits = 3) # Print fewer digits
+
+cbind(read.table(text = names(x)), round(x, 3))
+
+  
 fits <- list(fit = fit, fit3 = fit3, fit4 = fit4)
 
 round(sapply(fits, function(X) 
@@ -1190,26 +1193,54 @@ survey_df_c %>%
   ggplot(aes(y = partcip_will, x = interest, fill = interest)) +
   geom_boxplot(alpha = .5) +
   labs(title = "Relationship btw particip_will and interest",
-       subtitle = "This is a subtitle") +
+       x = "") +
   theme_ipsum_rc() +
   scale_fill_ipsum() +
-  theme(panel.grid.major.x = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        panel.grid.major.y = element_blank(),
-        panel.grid.minor.y = element_blank())
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank()) +
+  coord_flip() +
+  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
+  theme(axis.text.y = element_text(hjust = 0)) +
+  theme(plot.margin = unit(c(1,1,1,0), "cm"))
 
 survey_df_c %>% 
+  # factor(interest, ordered = T,
+  #        levels = rev(levels(survey_df_c$interest))) %>% 
   ggplot(aes(y = civic_crowd_gov, x = interest, fill = interest)) +
   geom_boxplot(alpha = .5) +
   labs(title = "Relationship btw civic_crowd_gov and interest",
+       x = "") +
+  theme_ipsum_rc() +
+  scale_fill_ipsum() +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank()) +
+  coord_flip() +
+  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
+  theme(axis.text.y = element_text(hjust = 0)) +
+  theme(plot.margin = unit(c(1,1,1,0), "cm"))
+survey_df_c %>% 
+  ggplot(aes(y = partcip_will, x = invest, fill = invest)) +
+  geom_boxplot(alpha = .5) +
+  labs(title = "Relationship btw particip_will and past investment",
        subtitle = "This is a subtitle") +
   theme_ipsum_rc() +
   scale_fill_ipsum() +
-  theme(panel.grid.major.x = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        panel.grid.major.y = element_blank(),
-        panel.grid.minor.y = element_blank())
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank()) +
+  coord_flip()
 
+
+
+survey_df_c %>% 
+  ggplot(aes(y = civic_crowd_gov, x = invest, fill = invest)) +
+  geom_boxplot(alpha = .5) +
+  labs(title = "Relationship btw civic_crowd_gov and past investment",
+       subtitle = "This is a subtitle") +
+  theme_ipsum_rc() +
+  scale_fill_ipsum() +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank()) +
+  coord_flip()
 
 sem_model <- "
 partcip_will =~ p2 + p1 + p3 + p4 + p5

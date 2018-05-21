@@ -11,7 +11,7 @@ output:
     toc: yes
     toc_depth: 4
     toc_float:
-      collapsed: false
+      collapsed: true
       smooth_scroll: true
 ---
 
@@ -33,7 +33,7 @@ The present document provides all of the code written in R in order for anyone t
 
 The input files as well as the code can be retrieved on our [Github page](https://github.com/antoinemercier82/BrusselsTogether-Mkg-Analytics-Solvay-BS-2018).
 
-# Data preprocessing
+# Data Preprocessing
 
 ### Preparation
 
@@ -70,7 +70,7 @@ header_lookup <- read_delim("inputs/header_lookup.txt", delim = ";")
 
 The preprocessing code is available below, although in order to improve the clarity of this document, **it is better to hide this code** (click on the `Hide` button on the right).
 
-```{r message = FALSE}
+```{r message = FALSE, warning = FALSE}
 # Dates preprocessing
 survey_df$date <- str_replace(string = survey_df$date,
                               pattern = "M GMT.*$",
@@ -473,6 +473,10 @@ survey_df_c$interest <- factor(survey_df_c$interest, ordered = TRUE,
                                              "Is_ready_Fund"))
 
 
+survey_df_c$grouping <- factor(survey_df_c$grouping, ordered = TRUE,
+                               levels = c("Citizen_not_active",
+                                          "Citizen_casual_vol"))
+
 convert_to_fact_lik <- function(df, columns) {
   for (column in columns) {
     df[[column]] <- factor(df[[column]],
@@ -523,7 +527,7 @@ survey_df_j$resp_type <- factor(survey_df_j$resp_type,
 ```
 
 
-# Analysis
+# Exploratory Data Analysis
 
 Now that we have imported and cleaned the data, we can start doing some exploratory analysis.
 
@@ -968,3 +972,225 @@ g6_title <- "General interest issues are addressed more efficiently\nby crowdfun
 lik_plot(t_g6, my_df_names_c_inv, mylevels_c_inv,
          factor_levels_c_inv, g6_title)
 ```
+
+
+# Confirmatory Factor Analysis
+
+### Introduction
+
+By design, there are questions that are intended to collectively measure one latent variable. For example, there are five questions related to the willigness from the citizens to participate in debates/face-to-face interations. Also, there are six questions related to whether a civic crowdfunding platform could be regarded as an intermediary between the citizens initiatives and the local authorities.
+
+Confirmatory Factor Analysis (CFA) allows us to reduce the dimensionality of several items into their corresponding latent variable. The resulting latent variable is a continuous numeric variable that captures the variability of its likert scale (thus categorical) items.
+
+Let's try it out.
+
+### Preprocessing
+
+Here below are the questions related to the two latent variables (p for participative and g for relationship between citizens initiatives and the government):
+
+```{r}
+meta <- data_frame(question = header_lookup$google_f_header[17:27],
+                   variable = names(survey_df_c)[5:15])
+
+meta %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped","hover"),
+                full_width = T)
+```
+
+After converting the categorical variables into an integer value, we can have a look at the first ten observations:
+
+```{r}
+survey_df_c_mat <- survey_df_c %>% 
+  filter(gender %in% c("Female", "Male")) %>% 
+  select(language:edu) %>% 
+  data.matrix() %>% 
+  as_data_frame() %>% 
+  mutate(male = as.numeric(gender == 2))
+
+survey_df_c_mat %>% 
+  select(interest:neighb, age, edu, loc) %>% 
+  head(n = 10) %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped","hover"),
+                full_width = T)
+```
+
+Note that the following variables were not displayed in this table (because they didn't fit into the webpage): `language`, `grouping` and `gender`).
+
+### Modeling
+
+#### Initial model
+
+In order to perform the CFA, we will use the lavaan (**la**tent **va**riable **an**alysis) R package.
+
+First we need to describe the model that we want to fit. We will use the variable names `partcip_will` and `civic_crowd_gov` to refer to the willigness from the citizens to participate in debates/face-to-face interations and whether a civic crowdfunding platform could be regarded as an intermediary between the citizens initiatives and the local authorities, respectively.
+
+```{r}
+model <- "
+partcip_will =~ p2 + p1 + p3 + p4 + p5
+civic_crowd_gov =~ g4 + g1 + g2 + g3 + g5 + g6
+"
+
+cat(model)
+```
+
+Next, we can fit this model and look at the summary statistics.
+
+```{r message = FALSE, warning = FALSE}
+fit1 <- cfa(model = model, data = survey_df_c_mat)
+
+summary(fit1, standardized = TRUE)
+```
+
+Then, we can extract the standardized parameter estimates as follows.
+
+```{r message = FALSE, warning = FALSE}
+options(scipen = 999, digits = 3) # Print fewer digits
+
+sfit1 <- standardizedsolution(fit1)
+
+sfit1 %>% 
+  filter(op == "=~") %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped","hover"),
+                full_width = T)
+```
+
+Finally, we can extract the most important fit statistics as follows.
+
+```{r}
+fit_1 <- fitmeasures(fit1, c("npar", "chisq", "df", "cfi", "rmsea", "srmr"))
+
+cbind(read.table(text = names(fit_1)), fit_1) %>% 
+  select(fit_1) %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped","hover"),
+                full_width = F, position = "left")
+```
+
+#### Model improvement
+
+Modification indices can be requested in order to determine if changes should be made to the model such as adding error covariance terms or removing poor performing items. Here, we sorted the output by `mi` in decreasing order.
+
+```{r}
+modificationindices(fit1) %>% 
+  arrange(desc(mi)) %>% 
+  head(10) %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped","hover"),
+                full_width = T)
+```
+
+In the lavaan package, `~~` means covariance terms. Let's add `p1 ~~ p5` and see if the model improves.
+
+```{r}
+model2 <- "
+partcip_will =~ p2 + p1 + p3 + p4 + p5
+civic_crowd_gov =~ g4 + g1 + g2 + g3 + g5 + g6
+p1 ~~ p5
+"
+
+cat(model2)
+```
+
+```{r}
+fit2 <- cfa(model = model2, data = survey_df_c_mat)
+
+fits <- list(fit_1 = fit1, fit_2 = fit2)
+
+round(sapply(fits, function(X)
+  fitmeasures(X, c("npar", "chisq", "df", "cfi", "rmsea", "srmr"))), 3) %>%
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped","hover"),
+                full_width = F, position = "left")
+```
+
+As we can see, the $\chi^2$ has improved by 12, the comparative fit index (cfi) has increased by 0.12, the root mean square error of approximation (rmsea) has improved by 0.019 and the standardized root mean square residual (srmr) has improved by 0.008.
+
+Instead of qualitatively assess the improvement, we can perform a significance test to compare the two models.
+
+```{r}
+anova(fit1, fit2)
+```
+
+As evidenced by the p-value way below 0.05, adding the covariance term significantly improved the model. We will then consider the latter model for the rest of this analysis.
+
+We can now save the latent variables and add to our dataset. In the following two tables we show, for the first six observations, the items p1 to p5 and their latent variable, as well as the items g1 to g6 and their own latent variable.
+
+```{r}
+pfit2 <- data.frame(predict(fit2))
+survey_df_c_mat2 <- cbind(survey_df_c_mat, pfit2)
+
+survey_df_c <- survey_df_c %>% 
+  filter(gender %in% c("Female", "Male")) %>% 
+  cbind(partcip_will = survey_df_c_mat2$partcip_will,
+        civic_crowd_gov = survey_df_c_mat2$civic_crowd_gov)
+
+survey_df_c %>% 
+  select(p1:p5, partcip_will) %>% 
+  head() %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped","hover"),
+                full_width = T)
+
+survey_df_c %>% 
+  select(g1:g6, civic_crowd_gov) %>% 
+  head() %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped","hover"),
+                full_width = T)
+```
+
+# Analysis using latent variables
+
+#### Qualitative assessment of the relationship between dependent and independent variables
+
+Let's see now if we can better assess the relationship between our independent variables (`partcip_will` and `civic_crowd_gov`) and our dependent variable, which is the degree interest of citizens in joining a civic crowdfunding platform.
+
+Our independent variables are now in the form of a continuous numeric value, thus we can use boxplots to explore these relationships.
+
+```{r fig.height = 5, fig.width = 10, fig.align = "center"}
+survey_df_c %>% 
+  ggplot(aes(y = partcip_will, x = interest, fill = interest)) +
+  geom_boxplot(alpha = .5) +
+  labs(title = "Relationship btw particip_will and interest",
+       x = "") +
+  theme_ipsum_rc() +
+  scale_fill_ipsum() +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank()) +
+  coord_flip() +
+  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
+  theme(axis.text.y = element_text(hjust = 0)) +
+  theme(plot.margin = unit(c(1,1,1,0), "cm"))
+
+survey_df_c %>% 
+  ggplot(aes(y = civic_crowd_gov, x = interest, fill = interest)) +
+  geom_boxplot(alpha = .5) +
+  labs(title = "Relationship btw civic_crowd_gov and interest",
+       x = "") +
+  theme_ipsum_rc() +
+  scale_fill_ipsum() +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank()) +
+  coord_flip() +
+  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
+  theme(axis.text.y = element_text(hjust = 0)) +
+  theme(plot.margin = unit(c(1,1,1,0), "cm"))
+```
+
+From these two plots, we can qualitatively assess that:
+
+* not being interested in joining a civic crowdfunding platform is associated with negative values of both independent variables
+* there does not seem to be a significant difference between the other categories of interest: they are all associated with values of the latent variable centered at or above zero.
+
+Therefore, we will choose to regroup the `interest` variable into two categories:
+
+* no interest (`Not_interested`)
+* weak or strong interest (`Could_be_interested_Vol`, `Could_be_interested_Fund`, `Is_ready_Vol`, `Is_ready_Fund`)
+
+This will allow us to fit a binary logistic regression model in the next section.
+
+#### Binary logistic regression model
+
