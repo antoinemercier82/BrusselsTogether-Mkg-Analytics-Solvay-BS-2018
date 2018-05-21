@@ -1,5 +1,5 @@
 ---
-title: "Summary of the citizen initiatives and civic crowdfunding survey for BrusselsTogether" 
+title: "Analysis of the citizen initiatives and civic crowdfunding survey for BrusselsTogether" 
 subtitle: "R code for reproducible research"
 author: "Paramio J., Piette C., Heremans S., Comté F., Mercier A."
 date: '`r format(Sys.time(), "%d %B, %Y")`'
@@ -27,7 +27,7 @@ include_graphics("inputs/SolvayBS_logo.gif")
 
 # Summary 
 
-This document provides the R code used to summarize the market research done by students at ULB/Sovay Brussels School on citizen initiatives and, in particular, civic crowdfunding. This research originated from a need by BrusselsTogether to better understand the factors driving the success of their own civic crowdfunding platform.
+This document provides the R code used to analyze survey data in the context of a the market research done by students at ULB/Sovay Brussels School on citizen initiatives and, in particular, civic crowdfunding. This research originated from a need by BrusselsTogether to better understand the factors driving the success of their own civic crowdfunding platform.
 
 The present document provides all of the code written in R in order for anyone to be able to check and reproduce the findings resulting from the online survey launched in April 2018 by the students.
 
@@ -563,7 +563,7 @@ addmargins(table(survey_df_e$language, survey_df_e$gender) %>%
              cbind(table(survey_df_c$language, survey_df_c$gender))) %>%
   kable() %>%
   kable_styling(bootstrap_options = c("striped","hover"),
-                full_width = T) %>%
+                full_width = T, font_size = 14) %>%
   column_spec(8, bold = T) %>% 
   row_spec(4, bold = T) %>%
   add_header_above(c(" ", "Entrepreneur" = 3, "Citizen" = 3, " " = 1))
@@ -732,7 +732,7 @@ survey_df_c %>%
   rename(interest_count = n) %>%
   mutate(interest = reorder(interest, interest_count)) %>%
   ggplot(aes(x = interest, y = interest_count)) +
-  geom_col() +
+  geom_col(fill = "#E39E54") +
   theme_ipsum_rc(grid = "X") +
   scale_fill_ipsum() +
   coord_flip() +
@@ -743,6 +743,19 @@ survey_df_c %>%
 
 ```
 
+```{r}
+options(scipen = 999, digits = 2)
+
+survey_df_c %>% 
+  count(interest) %>% 
+  mutate(total = sum(n),
+         percent = n / total) %>% 
+  select(interest, n, percent) %>% 
+  arrange(desc(n)) %>% 
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped","hover"),
+                full_width = F, position = "left", font_size = 14)
+```
 
 ```{r fig.height = 4, fig.width = 10, fig.align = "center"}
 my_df_names <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
@@ -856,7 +869,7 @@ survey_df_c %>%
   rename(invest_count = n) %>%
   mutate(invest = reorder(invest, invest_count)) %>%
   ggplot(aes(x = invest, y = invest_count)) +
-  geom_col() +
+  geom_col(fill = "#E39E54") +
   theme_ipsum_rc(grid = "X") +
   scale_fill_ipsum() +
   coord_flip() +
@@ -865,6 +878,21 @@ survey_df_c %>%
   theme(axis.text.y = element_text(hjust = 0)) +
   theme(plot.margin = unit(c(1,1,1,0), "cm"))
 
+```
+
+```{r}
+options(scipen = 999, digits = 2)
+
+survey_df_c %>% 
+  filter(invest != "") %>% 
+  count(invest) %>% 
+  mutate(total = sum(n),
+         percent = n / total) %>% 
+  select(invest, n, percent) %>% 
+  arrange(desc(n)) %>% 
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped","hover"),
+                full_width = F, position = "left", font_size = 14)
 ```
 
 As we can see from the previous plot, the distribution is highly imbalanced among the categories, and therefore, in the following plots, the percentages for the categories above 100€ represent only a handful of individuals.
@@ -995,7 +1023,7 @@ meta <- data_frame(question = header_lookup$google_f_header[17:27],
 meta %>% 
   kable() %>% 
   kable_styling(bootstrap_options = c("striped","hover"),
-                full_width = T)
+                full_width = T, font_size = 14)
 ```
 
 After converting the categorical variables into an integer value, we can have a look at the first ten observations:
@@ -1005,18 +1033,17 @@ survey_df_c_mat <- survey_df_c %>%
   filter(gender %in% c("Female", "Male")) %>% 
   select(language:edu) %>% 
   data.matrix() %>% 
-  as_data_frame() %>% 
-  mutate(male = as.numeric(gender == 2))
+  as_data_frame()
 
 survey_df_c_mat %>% 
-  select(interest:neighb, age, edu, loc) %>% 
+  select(interest:neighb, age, edu, loc, gender) %>% 
   head(n = 10) %>% 
   kable() %>% 
   kable_styling(bootstrap_options = c("striped","hover"),
-                full_width = T)
+                full_width = T, font_size = 14)
 ```
 
-Note that the following variables were not displayed in this table (because they didn't fit into the webpage): `language`, `grouping` and `gender`).
+Note that the following variables were not displayed in this table (because they didn't fit into the webpage): `language` and `grouping`).
 
 ### Modeling
 
@@ -1054,7 +1081,7 @@ sfit1 %>%
   filter(op == "=~") %>% 
   kable() %>% 
   kable_styling(bootstrap_options = c("striped","hover"),
-                full_width = T)
+                full_width = T, font_size = 14)
 ```
 
 Finally, we can extract the most important fit statistics as follows.
@@ -1066,7 +1093,7 @@ cbind(read.table(text = names(fit_1)), fit_1) %>%
   select(fit_1) %>% 
   kable() %>% 
   kable_styling(bootstrap_options = c("striped","hover"),
-                full_width = F, position = "left")
+                full_width = F, position = "left", font_size = 14)
 ```
 
 #### Model improvement
@@ -1079,7 +1106,7 @@ modificationindices(fit1) %>%
   head(10) %>% 
   kable() %>% 
   kable_styling(bootstrap_options = c("striped","hover"),
-                full_width = T)
+                full_width = T, font_size = 14)
 ```
 
 In the lavaan package, `~~` means covariance terms. Let's add `p1 ~~ p5` and see if the model improves.
@@ -1103,7 +1130,7 @@ round(sapply(fits, function(X)
   fitmeasures(X, c("npar", "chisq", "df", "cfi", "rmsea", "srmr"))), 3) %>%
   kable() %>%
   kable_styling(bootstrap_options = c("striped","hover"),
-                full_width = F, position = "left")
+                full_width = F, position = "left", font_size = 14)
 ```
 
 As we can see, the $\chi^2$ has improved by 12, the comparative fit index (cfi) has increased by 0.12, the root mean square error of approximation (rmsea) has improved by 0.019 and the standardized root mean square residual (srmr) has improved by 0.008.
@@ -1132,14 +1159,14 @@ survey_df_c %>%
   head() %>% 
   kable() %>% 
   kable_styling(bootstrap_options = c("striped","hover"),
-                full_width = T)
+                full_width = T, font_size = 14)
 
 survey_df_c %>% 
   select(g1:g6, civic_crowd_gov) %>% 
   head() %>% 
   kable() %>% 
   kable_styling(bootstrap_options = c("striped","hover"),
-                full_width = T)
+                full_width = T, font_size = 14)
 ```
 
 # Analysis using latent variables

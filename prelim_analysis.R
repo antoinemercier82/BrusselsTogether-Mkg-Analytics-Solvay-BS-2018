@@ -1261,3 +1261,145 @@ p_semfit %>%
   filter(op == "~")
 
 
+ggplot(survey_df_c, aes(x = partcip_will)) +
+  geom_histogram(fill = "#512DA8")
+
+ggplot(survey_df_c, aes(x = civic_crowd_gov)) +
+  geom_histogram(bins = 10)
+
+ggplot(survey_df_c, aes(x = partcip_will,
+                        col = interest,
+                        fill = interest)) + 
+  geom_density(alpha = .5)
+
+ggplot(survey_df_c, aes(x = civic_crowd_gov,
+                        col = interest,
+                        fill = interest)) + 
+  geom_density(alpha = .5)
+
+unique(round(survey_df_c$partcip_will, 1))
+
+unique(round(survey_df_c$civic_crowd_gov, 2))
+
+survey_df_c %>% 
+  count(interest) %>% 
+  mutate(total = sum(n),
+         percent = n / total) %>% 
+  select(interest, n, percent) %>% 
+  arrange(desc(n))
+
+str(survey_df_c)
+unique(survey_df_c$interest)
+
+names(survey_df_c)
+simple_glm <- survey_df_c %>%
+  mutate(interest_binary = ifelse(interest == "Is_ready_Fund",
+                                  0,
+                                  1)) %>% 
+  select(interest_binary, partcip_will) %>%
+  glm(interest_binary ~ partcip_will,
+      family = "binomial",
+      data = .)
+
+summary(simple_glm)
+
+
+simple_glm <- survey_df_c %>%
+  filter(interest != "Not_interested") %>% 
+  mutate(interest_binary = ifelse(interest %in% c("Is_ready_Vol",
+                                                  "Is_ready_Fund"),
+                                  1,
+                                  0)) %>% 
+  select(interest_binary, partcip_will) %>%
+  glm(interest_binary ~ partcip_will,
+      family = "binomial",
+      data = .)
+
+summary(simple_glm)
+
+
+simple_glm <- survey_df_c %>%
+  filter(interest != "Not_interested") %>% 
+  mutate(interest_binary = ifelse(interest %in% c("Is_ready_Vol",
+                                                  "Is_ready_Fund"),
+                                  1,
+                                  0)) %>% 
+  select(interest_binary, civic_crowd_gov) %>%
+  glm(interest_binary ~ civic_crowd_gov,
+      family = "binomial",
+      data = .)
+
+str(survey_df_c)
+summary(simple_glm)
+
+survey_df_c_mat <- survey_df_c %>% 
+  filter(gender %in% c("Female", "Male")) %>% 
+  filter(invest != "") %>% 
+  mutate(interest_binary = ifelse(interest == "Not_interested",
+                                  0,
+                                  1)) %>% 
+  select(interest_binary, language, p1:edu, -interest, -invest) %>% 
+  data.matrix() %>% 
+  as_data_frame()
+
+simple_glm <- glm(interest_binary ~ .,  family = "binomial", 
+                  data = survey_df_c_mat)
+
+summary(simple_glm)
+
+
+survey_df_c_mat <- survey_df_c %>% 
+  filter(gender %in% c("Female", "Male")) %>% 
+  filter(invest != "") %>% 
+  filter(interest != "Not_interested") %>% 
+  mutate(interest_binary = ifelse(interest %in% c("Is_ready_Vol",
+                                                  "Is_ready_Fund"),
+                                  1,
+                                  0)) %>% 
+  select(interest_binary, language, p1:edu, -invest) %>% 
+  data.matrix() %>% 
+  as_data_frame()
+
+simple_glm <- glm(interest_binary ~ .,  family = "binomial", 
+                  data = survey_df_c_mat)
+
+summary(simple_glm)
+
+
+
+
+str(survey_df_c)
+
+
+survey_df_c_mat <- survey_df_c %>% 
+  filter(gender %in% c("Female", "Male")) %>% 
+  filter(invest != "") %>% 
+  mutate(interest_binary = ifelse(interest == "Not_interested",
+                                  0,
+                                  1)) %>% 
+  select(interest_binary, language, neighb:civic_crowd_gov) %>% 
+  data.matrix() %>% 
+  as_data_frame()
+
+simple_glm <- glm(interest_binary ~ .,  family = "binomial", 
+                  data = survey_df_c_mat)
+
+summary(simple_glm)
+
+
+survey_df_c_mat <- survey_df_c %>% 
+  filter(gender %in% c("Female", "Male")) %>% 
+  filter(invest != "") %>% 
+  filter(interest != "Not_interested") %>% 
+  mutate(interest_binary = ifelse(interest %in% c("Is_ready_Vol",
+                                                  "Is_ready_Fund"),
+                                  1,
+                                  0)) %>% 
+  select(interest_binary, language, neighb:civic_crowd_gov) %>% 
+  data.matrix() %>% 
+  as_data_frame()
+
+simple_glm <- glm(interest_binary ~ .,  family = "binomial", 
+                  data = survey_df_c_mat)
+
+summary(simple_glm)
