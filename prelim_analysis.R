@@ -1332,13 +1332,19 @@ simple_glm <- survey_df_c %>%
 str(survey_df_c)
 summary(simple_glm)
 
+
+
+### Start
+
+# interest_binary ~ . when interest = "Not_interested" vs rest
+
 survey_df_c_mat <- survey_df_c %>% 
   filter(gender %in% c("Female", "Male")) %>% 
   filter(invest != "") %>% 
   mutate(interest_binary = ifelse(interest == "Not_interested",
                                   0,
                                   1)) %>% 
-  select(interest_binary, language, p1:edu, -interest, -invest) %>% 
+  select(interest_binary, language, p1:edu, -invest) %>% 
   data.matrix() %>% 
   as_data_frame()
 
@@ -1347,6 +1353,8 @@ simple_glm <- glm(interest_binary ~ .,  family = "binomial",
 
 summary(simple_glm)
 
+
+# interest_binary ~ . when interest = "Is_ready_*" vs "Could_be_..."
 
 survey_df_c_mat <- survey_df_c %>% 
   filter(gender %in% c("Female", "Male")) %>% 
@@ -1368,8 +1376,29 @@ summary(simple_glm)
 
 
 
-str(survey_df_c)
 
+# interest_binary ~ . when interest = "..._Fund" vs "..._Vol"
+
+survey_df_c_mat <- survey_df_c %>% 
+  filter(gender %in% c("Female", "Male")) %>% 
+  filter(invest != "") %>% 
+  filter(interest != "Not_interested") %>% 
+  mutate(interest_binary = ifelse(interest %in% c("Is_ready_Vol",
+                                                  "Could_be_interested_Vol"),
+                                  0,
+                                  1)) %>% 
+  select(interest_binary, language, p1:edu, -invest) %>% 
+  data.matrix() %>% 
+  as_data_frame()
+
+simple_glm <- glm(interest_binary ~ .,  family = "binomial", 
+                  data = survey_df_c_mat)
+
+summary(simple_glm)
+
+
+# interest_binary ~ . when interest = "Not_interested" vs rest when using latent
+# variables instead of p1:g6
 
 survey_df_c_mat <- survey_df_c %>% 
   filter(gender %in% c("Female", "Male")) %>% 
@@ -1387,6 +1416,9 @@ simple_glm <- glm(interest_binary ~ .,  family = "binomial",
 summary(simple_glm)
 
 
+# interest_binary ~ . when interest = "Is_ready_*" vs "Could_be_..." when using
+# latent variables instead of p1:g6
+
 survey_df_c_mat <- survey_df_c %>% 
   filter(gender %in% c("Female", "Male")) %>% 
   filter(invest != "") %>% 
@@ -1403,3 +1435,132 @@ simple_glm <- glm(interest_binary ~ .,  family = "binomial",
                   data = survey_df_c_mat)
 
 summary(simple_glm)
+
+
+
+# interest_binary ~ partcip_will when interest = "Not_interested" vs rest
+
+survey_df_c_mat <- survey_df_c %>% 
+  filter(gender %in% c("Female", "Male")) %>% 
+  filter(invest != "") %>% 
+  mutate(interest_binary = ifelse(interest == "Not_interested",
+                                  0,
+                                  1)) %>% 
+  select(interest_binary, partcip_will) %>% 
+  data.matrix() %>% 
+  as_data_frame()
+
+simple_glm <- glm(interest_binary ~ .,  family = "binomial", 
+                  data = survey_df_c_mat)
+
+summary(simple_glm)
+
+
+
+# interest_binary ~ partcip_will when interest = "Is_ready_*" vs "Could_be_..."
+
+survey_df_c_mat <- survey_df_c %>% 
+  filter(gender %in% c("Female", "Male")) %>% 
+  filter(invest != "") %>% 
+  filter(interest != "Not_interested") %>% 
+  mutate(interest_binary = ifelse(interest %in% c("Is_ready_Vol",
+                                                  "Is_ready_Fund"),
+                                  1,
+                                  0)) %>% 
+  select(interest_binary, partcip_will) %>% 
+  data.matrix() %>% 
+  as_data_frame()
+
+simple_glm <- glm(interest_binary ~ .,  family = "binomial", 
+                  data = survey_df_c_mat)
+
+summary(simple_glm)
+
+
+# interest_binary ~ civic_crowd_gov when interest = "Not_interested" vs rest
+
+survey_df_c_mat <- survey_df_c %>% 
+  filter(gender %in% c("Female", "Male")) %>% 
+  filter(invest != "") %>% 
+  mutate(interest_binary = ifelse(interest == "Not_interested",
+                                  0,
+                                  1)) %>% 
+  select(interest_binary, civic_crowd_gov) %>% 
+  data.matrix() %>% 
+  as_data_frame()
+
+simple_glm <- glm(interest_binary ~ .,  family = "binomial", 
+                  data = survey_df_c_mat)
+
+summary(simple_glm)
+
+
+# interest_binary ~ civic_crowd_gov when interest = "Is_ready_*" vs
+# "Could_be_..."
+
+survey_df_c_mat <- survey_df_c %>% 
+  filter(gender %in% c("Female", "Male")) %>% 
+  filter(invest != "" & interest != "Not_interested") %>% 
+  mutate(interest_binary = ifelse(interest %in% c("Is_ready_Vol",
+                                                  "Is_ready_Fund"),
+                                  1,
+                                  0)) %>% 
+  select(interest_binary, civic_crowd_gov) %>% 
+  data.matrix() %>% 
+  as_data_frame()
+
+simple_glm <- glm(interest_binary ~ .,  family = "binomial", 
+                  data = survey_df_c_mat)
+
+summary(simple_glm)
+
+unique(survey_df_c$age)
+
+survey_df_c <- survey_df_c %>% 
+  mutate(age_num = ifelse(age == "14_and_below", 12,
+                          ifelse(age == "14_17", 16,
+                                 ifelse(age == "18_24", 20,
+                                        ifelse(age == "25_34", 30,
+                                               ifelse(age == "35_44", 40,
+                                                      ifelse(age == "45_54", 50,
+                                                             ifelse(age == "55_64", 60,
+                                                                    ifelse(age == "65_74", 70, 80)))))))))
+
+survey_df_c$age_num
+
+ggplot(survey_df_c, aes(x = age_num)) +
+  geom_histogram()
+
+tidy_survey_df_c <- survey_df_c %>% 
+  select(age_num, p1:g6, neighb) %>% 
+  data.matrix() %>% 
+  as_data_frame() %>% 
+  gather(key, value, -age_num)
+
+tidy_survey_df_c %>%
+  group_by(key, value) %>%
+  summarize(age_num = mean(age_num, na.rm = TRUE)) %>%
+  ggplot(aes(value, age_num, color = key)) +
+  geom_line(size = 1.2, show.legend = FALSE, alpha = 0.5) +
+  geom_point() +
+  labs(title = "Relationship btw age and answers to likert questions",
+       x = "", y = "") +
+facet_wrap(~factor(key, ordered = T,
+                   levels = c("p1",
+                              "p2",
+                              "p3",
+                              "p4",
+                              "p5",
+                              "g1",
+                              "g2",
+                              "g3",
+                              "g4",
+                              "g5",
+                              "g6",
+                              "neighb")), nrow = 3) +
+  theme_ipsum_rc() +
+  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
+  theme(axis.text.y = element_text(hjust = 0)) +
+  theme(legend.position = "none") +
+  theme(plot.margin = unit(c(1,1,1,0), "cm"))
+  
