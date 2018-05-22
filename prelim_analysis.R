@@ -12,6 +12,7 @@ library(RColorBrewer)
 library(ggthemes)
 library(tibble)
 library(broom)
+library(rebus)
 # update_geom_font_defaults(family = font_rc_light)
 
 # options(device = "CairoWin")
@@ -226,6 +227,12 @@ survey_df$ec_neighb_nl <- lut_likert_nl[survey_df$ec_neighb_nl]
 survey_df$ec_neighb_fr <- lut_likert_fr[survey_df$ec_neighb_fr]
 
 # Location question preprocessing
+lut_loc_eng <- c("Brussels" = "Brussels",
+                 "Outside Belgium" = "Brussels",
+                 "Flanders" = "Flanders",
+                 "Wallonia" = "Wallonia")
+
+
 lut_loc_nl <- c("Brussel" = "Brussels",
                 "Brussels" = "Brussels",
                 "Vlanderen" = "Flanders",
@@ -236,6 +243,7 @@ lut_loc_fr <- c("Bruxelles-Capitale" = "Brussels",
                 "Flandre" = "Flanders",
                 "Wallonie" = "Wallonia")
 
+survey_df$ec_loc_eng <- lut_loc_eng[survey_df$ec_loc_eng]
 survey_df$ec_loc_nl <- lut_loc_nl[survey_df$ec_loc_nl]
 survey_df$ec_loc_fr <- lut_loc_fr[survey_df$ec_loc_fr]
 
@@ -292,11 +300,19 @@ survey_df$ec_age_nl <- lut_age_nl[survey_df$ec_age_nl]
 survey_df$ec_age_fr <- lut_age_fr[survey_df$ec_age_fr]
 
 # Education question preprocessing
+survey_df$ec_edu_eng <- str_replace(survey_df$ec_edu_eng,
+                                    pattern = "Bachelor" %R% ANY_CHAR %R% "s",
+                                    replacement = "Bachelor")
+
+survey_df$ec_edu_eng <- str_replace(survey_df$ec_edu_eng,
+                                    pattern = "Master" %R% ANY_CHAR %R% "s",
+                                    replacement = "Masters")
+
 lut_edu_eng <- c("Primary school or no schooling completed" = "Primary_or_None",
                  "High-School" = "High_school",
                  "Trade/technical/vocational training." = "Technical",
-                 "Bachelor’s degree." = "Bachelor",
-                 "Master’s degree." = "Master",
+                 "Bachelor degree." = "Bachelor",
+                 "Masters degree." = "Master",
                  "Doctorate degree." = "PhD")
 
 lut_edu_nl <- c("Lagere school of zonder diploma" = "Primary_or_None",
@@ -308,17 +324,22 @@ lut_edu_nl <- c("Lagere school of zonder diploma" = "Primary_or_None",
 
 lut_edu_fr <- c("Primaire ou sans diplôme" = "Primary_or_None",
                 "Diplôme secondaire" = "High_school",
+                "Diplôme secondaire + des formations qualifiantes" = "High_school",
                 "Diplôme secondaire technique" = "Technical",
                 "Bachelier" = "Bachelor",
                 "Master" = "Master",
-                "Doctorat" = "PhD")
+                "Double master même ;-)" = "Master",
+                "Doctorat" = "PhD",
+                "Post universirtaire" = "PhD")
 
 survey_df$ec_edu_eng <- lut_edu_eng[survey_df$ec_edu_eng]
 survey_df$ec_edu_nl <- lut_edu_nl[survey_df$ec_edu_nl]
 survey_df$ec_edu_fr <- lut_edu_fr[survey_df$ec_edu_fr]
 
-
-
+my_cols <- brewer.pal(9, "YlGnBu")
+my_cols[2:9]
+length(my_cols)
+length(my_cols[3:9])
 # Merging columns from the different languages
 all_cols <- names(survey_df)
 eng_cols <- all_cols[str_detect(all_cols, pattern = "eng$")]
@@ -1514,53 +1535,82 @@ simple_glm <- glm(interest_binary ~ .,  family = "binomial",
 
 summary(simple_glm)
 
-unique(survey_df_c$age)
 
-survey_df_c <- survey_df_c %>% 
-  mutate(age_num = ifelse(age == "14_and_below", 12,
-                          ifelse(age == "14_17", 16,
-                                 ifelse(age == "18_24", 20,
-                                        ifelse(age == "25_34", 30,
-                                               ifelse(age == "35_44", 40,
-                                                      ifelse(age == "45_54", 50,
-                                                             ifelse(age == "55_64", 60,
-                                                                    ifelse(age == "65_74", 70, 80)))))))))
 
-survey_df_c$age_num
 
-ggplot(survey_df_c, aes(x = age_num)) +
-  geom_histogram()
 
-tidy_survey_df_c <- survey_df_c %>% 
-  select(age_num, p1:g6, neighb) %>% 
-  data.matrix() %>% 
-  as_data_frame() %>% 
-  gather(key, value, -age_num)
+# 
+# unique(survey_df_c$age_num)
+# 
+# survey_df_c <- survey_df_c %>% 
+#   mutate(age_num = ifelse(age == "14_and_below", 12,
+#                           ifelse(age == "14_17", 16,
+#                                  ifelse(age == "18_24", 20,
+#                                         ifelse(age == "25_34", 30,
+#                                                ifelse(age == "35_44", 40,
+#                                                       ifelse(age == "45_54", 50,
+#                                                              ifelse(age == "55_64", 60,
+#                                                                     ifelse(age == "65_74", 70, 80)))))))))
+# 
+# names(survey_df_c)
+# 
+# ggplot(survey_df_c, aes(x = age_num)) +
+#   geom_histogram()
+# 
+# tidy_survey_df_c <- survey_df_c %>% 
+#   select(age_num, p1:g6, neighb) %>% 
+#   data.matrix() %>% 
+#   as_data_frame() %>% 
+#   gather(key, value, -age_num)
+# 
+# tidy_survey_df_c %>%
+#   group_by(key, value) %>%
+#   summarize(age_num = mean(age_num, na.rm = TRUE)) %>%
+#   ggplot(aes(value, age_num, color = key)) +
+#   geom_line(size = 1.2, show.legend = FALSE, alpha = 0.5) +
+#   geom_point() +
+#   labs(title = "Relationship btw age and answers to likert questions",
+#        x = "", y = "") +
+# facet_wrap(~factor(key, ordered = T,
+#                    levels = c("p1",
+#                               "p2",
+#                               "p3",
+#                               "p4",
+#                               "p5",
+#                               "g1",
+#                               "g2",
+#                               "g3",
+#                               "g4",
+#                               "g5",
+#                               "g6",
+#                               "neighb")), nrow = 3) +
+#   theme_ipsum_rc() +
+#   theme(plot.title = element_text(size = 14, hjust = 0.5)) +
+#   theme(axis.text.y = element_text(hjust = 0)) +
+#   theme(legend.position = "none") +
+#   theme(plot.margin = unit(c(1,1,1,0), "cm"))
+#   
+# names(survey_df_c)
+# survey_df_c %>% 
+#   filter(language == "English") %>% 
+#   select(language)
+# 
 
-tidy_survey_df_c %>%
-  group_by(key, value) %>%
-  summarize(age_num = mean(age_num, na.rm = TRUE)) %>%
-  ggplot(aes(value, age_num, color = key)) +
-  geom_line(size = 1.2, show.legend = FALSE, alpha = 0.5) +
-  geom_point() +
-  labs(title = "Relationship btw age and answers to likert questions",
-       x = "", y = "") +
-facet_wrap(~factor(key, ordered = T,
-                   levels = c("p1",
-                              "p2",
-                              "p3",
-                              "p4",
-                              "p5",
-                              "g1",
-                              "g2",
-                              "g3",
-                              "g4",
-                              "g5",
-                              "g6",
-                              "neighb")), nrow = 3) +
-  theme_ipsum_rc() +
-  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
-  theme(axis.text.y = element_text(hjust = 0)) +
-  theme(legend.position = "none") +
-  theme(plot.margin = unit(c(1,1,1,0), "cm"))
-  
+names(survey_df_c)
+unique(survey_df_c$grouping)
+
+header_lookup
+
+x <- c(1, 2, 3)
+
+x[c(1,3)]
+
+header_lookup$google_f_header[16]
+c(header_lookup$google_f_header[16], names(lut_c_int_eng))
+
+x <- names(lut_c_int_eng) %>% as_data_frame()
+colnames(x) <- header_lookup$google_f_header[16]
+x
+names(x) <- rep(header_lookup$google_f_header[16], length(x))
+as_data_frame(x)
+matrix(header_lookup$google_f_header[16] = names(lut_c_int_eng))
