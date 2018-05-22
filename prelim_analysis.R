@@ -1353,7 +1353,7 @@ simple_glm <- survey_df_c %>%
 str(survey_df_c)
 summary(simple_glm)
 
-
+levels(survey_df_c$interest)
 
 ### Start
 
@@ -1389,10 +1389,10 @@ survey_df_c_mat <- survey_df_c %>%
   data.matrix() %>% 
   as_data_frame()
 
-simple_glm <- glm(interest_binary ~ .,  family = "binomial", 
+glm2 <- glm(interest_binary ~ .,  family = "binomial", 
                   data = survey_df_c_mat)
 
-summary(simple_glm)
+summary(glm2)
 
 
 
@@ -1412,10 +1412,10 @@ survey_df_c_mat <- survey_df_c %>%
   data.matrix() %>% 
   as_data_frame()
 
-simple_glm <- glm(interest_binary ~ .,  family = "binomial", 
+glm3 <- glm(interest_binary ~ .,  family = "binomial", 
                   data = survey_df_c_mat)
 
-summary(simple_glm)
+summary(glm3)
 
 
 # interest_binary ~ . when interest = "Not_interested" vs rest when using latent
@@ -1431,10 +1431,10 @@ survey_df_c_mat <- survey_df_c %>%
   data.matrix() %>% 
   as_data_frame()
 
-simple_glm <- glm(interest_binary ~ .,  family = "binomial", 
+glm4 <- glm(interest_binary ~ .,  family = "binomial", 
                   data = survey_df_c_mat)
 
-summary(simple_glm)
+summary(glm4)
 
 
 # interest_binary ~ . when interest = "Is_ready_*" vs "Could_be_..." when using
@@ -1452,10 +1452,10 @@ survey_df_c_mat <- survey_df_c %>%
   data.matrix() %>% 
   as_data_frame()
 
-simple_glm <- glm(interest_binary ~ .,  family = "binomial", 
+glm5 <- glm(interest_binary ~ .,  family = "binomial", 
                   data = survey_df_c_mat)
 
-summary(simple_glm)
+summary(glm5)
 
 
 
@@ -1471,10 +1471,10 @@ survey_df_c_mat <- survey_df_c %>%
   data.matrix() %>% 
   as_data_frame()
 
-simple_glm <- glm(interest_binary ~ .,  family = "binomial", 
+glm6 <- glm(interest_binary ~ .,  family = "binomial", 
                   data = survey_df_c_mat)
 
-summary(simple_glm)
+summary(glm6)
 
 
 
@@ -1492,10 +1492,10 @@ survey_df_c_mat <- survey_df_c %>%
   data.matrix() %>% 
   as_data_frame()
 
-simple_glm <- glm(interest_binary ~ .,  family = "binomial", 
+glm7 <- glm(interest_binary ~ .,  family = "binomial", 
                   data = survey_df_c_mat)
 
-summary(simple_glm)
+summary(glm7)
 
 
 # interest_binary ~ civic_crowd_gov when interest = "Not_interested" vs rest
@@ -1510,10 +1510,10 @@ survey_df_c_mat <- survey_df_c %>%
   data.matrix() %>% 
   as_data_frame()
 
-simple_glm <- glm(interest_binary ~ .,  family = "binomial", 
+glm8 <- glm(interest_binary ~ .,  family = "binomial", 
                   data = survey_df_c_mat)
 
-summary(simple_glm)
+summary(glm8)
 
 
 # interest_binary ~ civic_crowd_gov when interest = "Is_ready_*" vs
@@ -1530,10 +1530,10 @@ survey_df_c_mat <- survey_df_c %>%
   data.matrix() %>% 
   as_data_frame()
 
-simple_glm <- glm(interest_binary ~ .,  family = "binomial", 
+glm9 <- glm(interest_binary ~ .,  family = "binomial", 
                   data = survey_df_c_mat)
 
-summary(simple_glm)
+summary(glm9)
 
 
 
@@ -1599,18 +1599,15 @@ summary(simple_glm)
 names(survey_df_c)
 unique(survey_df_c$grouping)
 
-header_lookup
+length(levels(survey_df_c$age))
 
-x <- c(1, 2, 3)
+survey_df_c[survey_df_c$interest != "Not_interested", survey_df_c$interest]
 
-x[c(1,3)]
+toto <- survey_df_c %>% 
+  filter(interest != "Not_interested") %>% 
+  select(interest) %>% 
+  as.data.frame()
 
-header_lookup$google_f_header[16]
-c(header_lookup$google_f_header[16], names(lut_c_int_eng))
+str(toto)
 
-x <- names(lut_c_int_eng) %>% as_data_frame()
-colnames(x) <- header_lookup$google_f_header[16]
-x
-names(x) <- rep(header_lookup$google_f_header[16], length(x))
-as_data_frame(x)
-matrix(header_lookup$google_f_header[16] = names(lut_c_int_eng))
+survey_df_c$interest[survey_df_c$interest != "Not_interested"]

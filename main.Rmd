@@ -661,10 +661,10 @@ addmargins(table(survey_df_e$age, survey_df_e$loc) %>%
 
 Concerning the citizens, the objective of this survey is to test two hypotheses that were derived from our qualitative research:
 
-1. H3: The need for more participation in debates on public issues is positively correlated with the interest in joining a civic crowdfunding platform.
-2. H4: A positive opinion on projects that are co-created by social entrepreneurs and the local government through civic crowdfunding platforms is positively correlated with the interest in joining a civic crowdfunding platform.
+1. H3: The need for more participation in debates on public issues is positively correlated with the interest to support citizens initiatives.
+2. H4: A positive opinion on projects that are co-created by social entrepreneurs and the local government through civic crowdfunding platforms is positively correlated with the interest to support citizens initiatives.
 
-The interest in joining a civic crowdfunding platform is our dependent variable (this is the outcome that BrusselsTogether would like to improve) and is measured by the question shown in the table below. Also shown in this table is the related variable name in the R code.
+The interest to support citizens initiatives is our dependent variable (this is the outcome that BrusselsTogether would like to improve) and is measured by the question shown in the table below. Also shown in this table is the related variable name in the R code.
 
 ```{r}
 x <- list(q = names(lut_c_int_eng)[c(1, 3, 2, 5, 4)], v = levels(survey_df_c$interest)) %>% as_data_frame()
@@ -710,7 +710,7 @@ survey_df_c %>%
 
 The independent variables (the need for more participation in debates on public issues for H3 and the opinion on projects that are co-created by social entrepreneurs and the local government through civic crowdfunding platforms for H4) are what we think could be drivers for the dependent variable. If the correlations are verified, then we could provide BrusselsTogether with actionnable recommendations, such as making the platform more participative or playing a role of intermediary between citizens initiatives and the local authorities.
 
-For each of the two independent variables, we measured a set of questions which, in our opinion, should reflect their corresponding independent variable. In this case, we could say that the independent variables are latent variables that are each measured by a set of several items.
+For each of the two independent variables, we measured a set of questions which, in our opinion, should reflect their corresponding independent variable. In this case, we could say that the independent variables are latent variables that are each measured by a set of several items. We will dig more into the idea of latent variable in the chapter "Confirmatory Factor Analysis".
 
 The table below displays the items and their related variable name in the R code. The items related to the need for more participation in debates on public issues are `p1` to `p5` and the items related to opinion on projects that are co-created by social entrepreneurs and the local government through civic crowdfunding platforms are `g1` to `g6`.
 
@@ -879,7 +879,9 @@ lik_plot(t_c_g, my_df_names_c_g, mylevels_c_g, factor_levels_c_g, c_g_title)
 
 Finally, we asked how much the respondants were already investing in citizens initiatives. This could be regarded as a secondary dependent variable that captures the interest in citizens initiatives.
 
-This question, along with its corresponding choices and R variable names, are shown in the table below.
+Note that this feature was added a bit later after having launched the survey online, so the first few observations do not contain information for this question.
+
+This question, along with its corresponding choices and R variable names, is shown in the table below.
 
 ```{r}
 x <- list(q = names(lut_c_invest_eng),
@@ -1174,18 +1176,8 @@ tidy_survey_df_c %>%
   labs(title = "Relationship btw age and answers to likert scale questions",
        x = "Answer to likert scale question", y = "Mean age") +
 facet_wrap(~factor(key, ordered = T,
-                   levels = c("p1",
-                              "p2",
-                              "p3",
-                              "p4",
-                              "p5",
-                              "g1",
-                              "g2",
-                              "g3",
-                              "g4",
-                              "g5",
-                              "g6",
-                              "neighb")), nrow = 3) +
+                   levels = c("p1", "p2", "p3", "p4", "p5", "g1", "g2",
+                              "g3", "g4", "g5", "g6", "neighb")), nrow = 3) +
   theme_ipsum_rc() +
   theme(plot.title = element_text(size = 14, hjust = 0.5)) +
   theme(axis.text.y = element_text(hjust = 0)) +
@@ -1193,6 +1185,169 @@ facet_wrap(~factor(key, ordered = T,
   theme(plot.margin = unit(c(1,1,1,0), "cm"))
 ```
 
+Here below is a reminder of the questions and their variable names.
+
+```{r}
+meta <- data_frame(question = header_lookup$google_f_header[c(17:27, 29)],
+                   variable_name = names(survey_df_c)[c(5:15, 17)])
+
+meta %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped","hover"),
+                full_width = T, font_size = 14)
+```
+
+# Logistic regression modeling
+
+### Introduction
+
+In this chapter, we are going to fit a multiple binary logistic regression model (which is the most basic model used to predict a categorical response, such as our two dependent variables "interest" and "past investment"). This is useful because this model will allow us to see which predictors (in our case the independent variable questions) are driving the likelihood of people to be interested in civic crowdfunding platforms.
+
+This kind of model can only predict a target variable which has no more than two classes, thus the term binary. However, our dependent variables have more than two classes (for example, there are five classes for the "interest" variable, from "Not interested" up to "Ready to fund"). Therefore, we will fit several models after having split our dependent variable classes into two groups, in several ways. This is called the "one versus rest" approach. There are of course more complex models that can handle more than two classes in the target variable, but we will keep things simple here.
+
+Note that designing a survey with ordinal categorical variables such as questions with choices on a 5-point Likert scale or age or education makes it easier to interpret the results of the models, as we will see next.
+
+### Logicstic regression with Interest as the target variable
+
+#### Model 1
+
+In this section, we will fit models with Interest (in civic crowdfunding platforms) as the target variable and all of the dependent variables, as well as the control variables, as the explanatory variables.
+
+In the first model, we will split the Interest variable into the two following groups:
+
+* Class 0: "Not_interested";
+* Class 1: The rest of the possible classes ("Could_be_interested_Vol", "Could_be_interested_Fund", "Is_ready_Vol", "Is_ready_Fund") combined.
+
+Also, we filter out observations with gender other than Female and Male. Females are then represented by the integer value 1 and Male are represented by the integer value 2.
+
+Answers to Likert scale questions range from 1 ("Strongly disagree") to 5 ("Strongly agree").
+
+Answers to the question about the age of the respondant range from 1 ("Under 14 years old") to 9 ("75 years old and plus").
+
+Answers to the education question range from 1 ("Primary_or_None") to 6 ("PhD").
+
+Finally, answers to the location and language questions have three levels:
+
+* "Brussels" = 1, "Flanders" = 2, "Wallonia" = 3;
+* "English" = 1, "Dutch" = 2, "French" = 3.
+
+```{r message = FALSE, warning = FALSE}
+survey_df_c_mat <- survey_df_c %>% 
+  filter(gender %in% c("Female", "Male")) %>% 
+  filter(invest != "") %>% 
+  mutate(interest_binary = ifelse(interest == "Not_interested",
+                                  0,
+                                  1)) %>% 
+  select(interest_binary, language, p1:edu, -invest) %>% 
+  data.matrix() %>% 
+  as_data_frame()
+
+glm1 <- glm(interest_binary ~ .,  family = "binomial", 
+                  data = survey_df_c_mat)
+
+summary(glm1)
+```
+
+There is a lot of output, but we are going to focus on the Coefficients table in the middle.
+
+In order to be able to interpret anything meaningful, we first have to look at the p-values represented in the last column of the Ceofficients table ("Pr(>|z|)"). The p-value is used to test for statistical significance. We won't go into the theory of inference for regression, but simply put, low p-values (below 0.05) generally mean that we can rule out that the effect of the coefficient is due to chance. In other words, we are looking for coefficients for which the p-value is below 0.05.
+
+In the present case, all p-values are about 1, so this model is useless. In fact, the model did not converge. This is probably due to the high imbalance in the response variable. Indeed, as already mentionned, the class "Not_interested" represents only 5% of the sample or 7 out of 150 observations.
+
+Therefore, we cannot infer anything regarding factors that affect the likelihood of people not to be interested in civic crowdfunding platforms as opposed to being somewhat interested ("Could be interested) or definetly interested ("Is ready").
+
+#### Model 2
+
+In this second model, we are filtering out the observations where people are not interested in joining a civic crowdfunding platform, therefore we are now focusing on a subset of the data. Then we split the observations into the two following groups, related to the "interest" variable:
+
+* Class 0: "Could_be_interested_Vol" and "Could_be_interested_Fund";
+* Class 1: "Is_ready_Vol" and "Is_ready_Fund".
+
+The rest of the model is similar to the model 1.
+
+```{r message = FALSE, warning = FALSE}
+survey_df_c_mat <- survey_df_c %>% 
+  filter(gender %in% c("Female", "Male")) %>% 
+  filter(invest != "") %>% 
+  filter(interest != "Not_interested") %>% 
+  mutate(interest_binary = ifelse(interest %in% c("Is_ready_Vol",
+                                                  "Is_ready_Fund"),
+                                  1,
+                                  0)) %>% 
+  select(interest_binary, language, p1:edu, -invest) %>% 
+  data.matrix() %>% 
+  as_data_frame()
+
+glm2 <- glm(interest_binary ~ .,  family = "binomial", 
+                  data = survey_df_c_mat)
+
+summary(glm2)
+```
+
+Now we have three variables for which the p-value of the coefficient is less than 0.05. Let's extract them into the following table:
+
+```{r}
+options(scipen = 999, digits = 3) # Print fewer digits
+
+glm2 %>% 
+  tidy() %>%
+  filter(p.value < 0.05) %>%
+  arrange(desc(estimate)) %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped","hover"),
+                full_width = F, position = "left", font_size = 14)
+```
+
+We can interpret this table as follows:
+
+1. Since the effect size (i.e. the estimate of the coefficient) associated with the variable age is above zero, then older people are more likely to be "ready" to fund or volunteer, after controlling for the other variables in the model.
+
+Let's have a look at a bar chart representing the proportions of interest conditionned on age group:
+
+```{r fig.height = 6, fig.width = 10, fig.align = "center"}
+my_cols <- brewer.pal(9, "YlGnBu")
+
+survey_df_c %>% 
+  filter(interest != "Not_interested") %>% 
+  ggplot(aes(x = interest, fill = age)) +
+  geom_bar(alpha = 0.8, position = "fill") +
+  labs(title = "Proportions of interest conditionned on age group", y = "Proportion") +
+  theme_ipsum_rc() +
+  scale_fill_manual(values = my_cols[3:9]) +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank()) +
+  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
+  theme(axis.text.y = element_text(hjust = 0)) +
+  theme(plot.margin = unit(c(1,1,1,0), "cm"))
+```
+
+This plot seems to confirm the negative relationship identified in point 1.
+
+2. Similarly, since the effect size associated with the variable g4 is negative, then people agreeing with the statement "Civic crowdfunding platforms could play a role of intermediary between citizen’s initiatives and the local government." are less likely to be "ready" to fund or volunteer (they are more likely to have answered "I could be interested to ..."), after controlling for the other variables in the model.
+
+Let's have a look at a plot similar to what we did in the Exploratory Data Analysis, but without the category "Not interested":
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_g4 <- prop.table(table(survey_df_c$interest[survey_df_c$interest != "Not_interested"], survey_df_c$g4[survey_df_c$interest != "Not_interested"]), 1)
+g4_title <- "\nCivic crowdfunding platforms could play a role of\nintermediary between citizen's initiatives and the local government.\n"
+
+lik_plot(t_g4, my_df_names, mylevels, factor_levels, g4_title)
+```
+
+This confirms visually the negative relationship identified in point 2.
+
+3. Finally, people agreeing with the statement "I would be more inclined to contribute financially to a project on a civic crowdfunding platform if I had the possibility to express my disagreement about some aspects of the project." are less likely to be "ready" to fund or volunteer, after controlling for the other variables in the model.
+
+Similar to the second point, let's try to confirm this visually:
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_p4 <- prop.table(table(survey_df_c$interest[survey_df_c$interest != "Not_interested"], survey_df_c$p4[survey_df_c$interest != "Not_interested"]), 1)
+p4_title <- "I would be more inclined to contribute financially to\na project on a civic crowdfunding platform if I had the possibility\nto express my disagreement about some aspects of the project.\n"
+
+lik_plot(t_p4, my_df_names, mylevels, factor_levels, p4_title)
+```
+
+The negative relationship identified in the third point is less clear from this plot.
 
 # Confirmatory Factor Analysis
 
