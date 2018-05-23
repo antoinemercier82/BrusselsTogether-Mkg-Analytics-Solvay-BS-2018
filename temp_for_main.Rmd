@@ -815,3 +815,209 @@ lik_plot(t_e_neighb, my_df_names_e_neighb, mylevels_e_neighb, factor_levels_e_ne
 
 We can break down the distribution of answers related to the independent variables by interest in joining a civic crowdfunding platform.
 
+As for the analysis of the citizens responses, we should keep in mind that people "ready to join" and "not interested" represent only a fraction of the sample.
+
+Here below is a series of plots related to the "participative" questions.
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+my_df_names <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
+                 "Agree", "Strongly agree")
+mylevels <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
+              "Agree", "Strongly agree")
+factor_levels <- c("Not_interested",
+                   "Could_be_interested",
+                   "Is_ready")
+
+t_p1 <- prop.table(table(survey_df_e$interest, survey_df_e$p1), 1)
+p1_title <- "\n\n\nFace-to-face interactions are necessary for collective action.\n"
+
+lik_plot(t_p1, my_df_names, mylevels, factor_levels, p1_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_p2 <- prop.table(table(survey_df_e$interest, survey_df_e$p2), 1)
+p2_title <- "For most citizens on a civic crowdfunding platform,\npersonnally funding a citizen's initiative is enough to\nsatisfy their desire to engage in this project.\n"
+
+lik_plot(t_p2, my_df_names, mylevels, factor_levels, p2_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_p3 <- prop.table(table(survey_df_e$interest, survey_df_e$p3), 1)
+p3_title <- "\nCitizens would like to participate in debates\non local public issues that they care about.\n"
+
+lik_plot(t_p3, my_df_names, mylevels, factor_levels, p3_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_p4 <- prop.table(table(survey_df_e$interest, survey_df_e$p4), 1)
+p4_title <- "\nIt is relatively easy for citizens to find places where\nlocal public issues are collectively debated.\n"
+
+lik_plot(t_p4, my_df_names, mylevels, factor_levels, p4_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_p5 <- prop.table(table(survey_df_e$interest, survey_df_e$p5), 1)
+p5_title <- "I would welcome the possibility for citizens on a crowdfunding platform\nto express their disagreement about some aspects\nof the projects they contribute to financially.\n"
+
+lik_plot(t_p5, my_df_names, mylevels, factor_levels, p5_title)
+```
+
+Here below is a series of plots related to the "government" questions.
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+my_df_names <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
+                 "Agree", "Strongly agree")
+mylevels <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
+              "Agree", "Strongly agree")
+factor_levels <- c("Not_interested",
+                   "Could_be_interested",
+                   "Is_ready")
+
+t_g1 <- prop.table(table(survey_df_e$interest, survey_df_e$g1), 1)
+g1_title <- "\nCivic crowdfunding represents a direct threat to the funding of\npublic goods and services by the local government.\n"
+
+lik_plot(t_g1, my_df_names, mylevels, factor_levels, g1_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_g2 <- prop.table(table(survey_df_e$interest, survey_df_e$g2), 1)
+g2_title <- "\nI regard crowdfunded citizen's initiatives\nas a sort of_Do-It-Yourself government_.\n"
+
+lik_plot(t_g2, my_df_names, mylevels, factor_levels, g2_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_g3 <- prop.table(table(survey_df_c$interest, survey_df_c$g3), 1)
+g3_title <- "\nThe local government is able to identify\nthe projects that are most wanted by citizens.\n"
+
+lik_plot(t_g3, my_df_names, mylevels, factor_levels, g3_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_g4 <- prop.table(table(survey_df_e$interest, survey_df_e$g4), 1)
+g4_title <- "\nCivic crowdfunding platforms could play a role of intermediary\nbetween citizen's initiatives and the local government.\n"
+
+lik_plot(t_g4, my_df_names, mylevels, factor_levels, g4_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_g5 <- prop.table(table(survey_df_e$interest, survey_df_e$g5), 1)
+g5_title <- "\nGeneral interest issues are addressed more efficiently by\ncrowdfunded citizen's initiatives than by the local government.\n"
+
+lik_plot(t_g5, my_df_names, mylevels, factor_levels, g5_title)
+```
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_g6 <- prop.table(table(survey_df_e$interest, survey_df_e$g6), 1)
+g6_title <- "General interest issues are addressed more efficiently by\ncrowdfunded citizen's initiatives than by\nnon-profit organizations subsidized by the local government.\n"
+
+lik_plot(t_g6, my_df_names, mylevels, factor_levels, g6_title)
+```
+
+Here below is the plot related to the "interest in the future of my neighborhood" question.
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_neighb <- prop.table(table(survey_df_e$interest, survey_df_e$neighb), 1)
+neighb_title <- "\nMy interest in contributing to the future of my neighborhood\nhas increased in the past several years.\n"
+
+lik_plot(t_neighb, my_df_names, mylevels, factor_levels, neighb_title)
+```
+
+###  Distribution of answers for independent variables broken down by education
+
+Here below is a plot showing the education vs answers to independent variables questions, broken down by independent variables questions.
+
+```{r fig.height = 7, fig.width = 10, fig.align = "center"}
+survey_df_e <- survey_df_e %>% 
+  mutate(edu_num = unclass(survey_df_e$edu))
+
+tidy_survey_df_e <- survey_df_e %>% 
+  select(edu_num, p1:g6, neighb) %>% 
+  data.matrix() %>% 
+  as_data_frame() %>% 
+  gather(key, value, -edu_num)
+
+tidy_survey_df_e %>%
+  group_by(key, value) %>%
+  summarize(edu_num = mean(edu_num, na.rm = TRUE)) %>%
+  ggplot(aes(value, edu_num, color = key)) +
+  geom_line(size = 1.2, show.legend = FALSE, alpha = 0.5) +
+  geom_point() +
+  labs(title = "Relationship btw education and answers to likert scale questions",
+       x = "Answer to likert scale question", y = "Mean education") +
+  facet_wrap(~factor(key, ordered = T,
+                     levels = c("p1", "p2", "p3", "p4", "p5", "g1", "g2",
+                                "g3", "g4", "g5", "g6", "neighb")), nrow = 3) +
+  theme_ipsum_rc() +
+  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
+  theme(axis.text.y = element_text(hjust = 0)) +
+  theme(legend.position = "none") +
+  theme(plot.margin = unit(c(1,1,1,0), "cm")) +
+  theme(
+    panel.grid.minor.y = element_blank()
+  )
+```
+
+For this plot, the education is coded as an integer value as shown in the following table (see the column "edu_num"). This table also shows the count for each level (under the column "n").
+
+```{r}
+options(scipen = 999, digits = 3)
+
+survey_df_e %>% 
+  count(edu, edu_num) %>%
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped","hover"),
+                full_width = F, position = "left", font_size = 14)
+```
+
+Here below is a reminder of the questions and their variable names.
+
+```{r}
+meta <- data_frame(question = header_lookup$google_f_header[c(5:15, 29)],
+                   variable_name = names(survey_df_e)[c(5:16)])
+
+meta %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped","hover"),
+                full_width = T, font_size = 14)
+```
+
+###  Distribution of answers for independent variables broken down by age
+
+Here below is a plot showing the mean age vs answers to independent variables questions, broken down by independent variables questions.
+
+```{r fig.height = 7, fig.width = 10, fig.align = "center"}
+survey_df_e <- survey_df_e %>% 
+  mutate(age_num = ifelse(age == "14_and_below", 12,
+                          ifelse(age == "14_17", 16,
+                                 ifelse(age == "18_24", 20,
+                                        ifelse(age == "25_34", 30,
+                                               ifelse(age == "35_44", 40,
+                                                      ifelse(age == "45_54", 50,
+                                                             ifelse(age == "55_64", 60,
+                                                                    ifelse(age == "65_74", 70, 80)))))))))
+
+tidy_survey_df_e <- survey_df_e %>% 
+  select(age_num, p1:g6, neighb) %>% 
+  data.matrix() %>% 
+  as_data_frame() %>% 
+  gather(key, value, -age_num)
+
+tidy_survey_df_e %>%
+  group_by(key, value) %>%
+  summarize(age_num = mean(age_num, na.rm = TRUE)) %>%
+  ggplot(aes(value, age_num, color = key)) +
+  geom_line(size = 1.2, show.legend = FALSE, alpha = 0.5) +
+  geom_point() +
+  labs(title = "Relationship btw age and answers to likert scale questions",
+       x = "Answer to likert scale question", y = "Mean age") +
+  facet_wrap(~factor(key, ordered = T,
+                     levels = c("p1", "p2", "p3", "p4", "p5", "g1", "g2",
+                                "g3", "g4", "g5", "g6", "neighb")), nrow = 3) +
+  theme_ipsum_rc() +
+  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
+  theme(axis.text.y = element_text(hjust = 0)) +
+  theme(legend.position = "none") +
+  theme(plot.margin = unit(c(1,1,1,0), "cm"))
+```
+
