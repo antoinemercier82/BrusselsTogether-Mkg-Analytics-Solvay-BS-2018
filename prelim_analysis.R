@@ -18,9 +18,17 @@ library(rebus)
 # options(device = "CairoWin")
 
 
+survey_df <- read_delim("inputs/Citizen initiative.csv",
+                   delim = ",", skip = 1,
+                   col_names = FALSE)
+
+temp_header <- read_delim("inputs/Replacement_of_csv_header.txt",
+                   delim = ",")
+
+colnames(survey_df) <- colnames(temp_header)
 
 # Data import
-survey_df <- read_csv("inputs/Citizen initiative.csv")
+# survey_df <- read_csv("inputs/Citizen initiative.csv")
 header_lookup <- read_delim("inputs/header_lookup.txt", delim = ";")
 # names(survey_df) <- header_lookup$df_header
 
@@ -38,6 +46,21 @@ survey_df$date <- ymd_hms(survey_df$date)
 
 survey_df <- survey_df %>% 
                 filter(date > "2018-04-27 20:00:00")
+
+unique(survey_df$ec_loc_eng)
+unique(survey_df$ec_loc_nl)
+unique(survey_df$ec_loc_fr)
+
+names(survey_df)
+survey_df %>% 
+  count(ec_loc_eng, ec_loc_nl, ec_loc_fr)
+
+survey_df %>% 
+  filter(is.na(ec_loc_eng) & !is.na(c_p5_eng)) %>% 
+  select(date)
+
+names(survey_df)
+dim(survey_df)
 
 # Language preprocessing
 lut_lang <- c("English" = "English",
@@ -233,7 +256,7 @@ survey_df$ec_neighb_fr <- lut_likert_fr[survey_df$ec_neighb_fr]
 
 # Location question preprocessing
 lut_loc_eng <- c("Brussels" = "Brussels",
-                 "Outside Belgium" = "Brussels",
+                 "Outside Belgium " = "Brussels",
                  "Flanders" = "Flanders",
                  "Wallonia" = "Wallonia")
 
@@ -245,6 +268,7 @@ lut_loc_nl <- c("Brussel" = "Brussels",
                 "Wallonië" = "Wallonia")
 
 lut_loc_fr <- c("Bruxelles-Capitale" = "Brussels",
+                "cameroun/ngaoundéré" = "Brussels",
                 "Flandre" = "Flanders",
                 "Wallonie" = "Wallonia")
 
