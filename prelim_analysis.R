@@ -69,9 +69,14 @@ lut_e_int_eng <- c("I am not interested in joining a civic crowdfunding platform
                    "I could be interested to join a civic crowdfunding platform." = "Could_be_interested",
                    "I am ready to join a civic crowdfunding platform." = "Is_ready")
 
-lut_e_int_nl <- c("Ik ben niet geinteresseerd bij het toetreden van een ‘civic crowdfunding’ platform." = "Not_interested",
-                  "Ik zou geinteresseerd kunnen zijn in het toetreden van een ‘civic crowdfunding’ platform." = "Could_be_interested",
-                  "Ik wil deel uitmaken van een ‘civic crowdfunding’ platform." = "Is_ready")
+
+survey_df$e_interest_nl <- str_replace(survey_df$e_interest_nl,
+                                       pattern = "een " %R% ANY_CHAR %R% "civic crowdfunding" %R% ANY_CHAR %R% " platform",
+                                       replacement = "een civic crowdfunding platform")
+
+lut_e_int_nl <- c("Ik ben niet geinteresseerd bij het toetreden van een civic crowdfunding platform." = "Not_interested",
+                  "Ik zou geinteresseerd kunnen zijn in het toetreden van een civic crowdfunding platform." = "Could_be_interested",
+                  "Ik wil deel uitmaken van een civic crowdfunding platform." = "Is_ready")
 
 lut_e_int_fr <- c("Je ne suis pas intéressé.e par l'adhésion à une plateforme de crowdfunding citoyen." = "Not_interested",
                   "Je pourrais être intéressé.e par l'adhésion à une plateforme de crowdfunding citoyen." = "Could_be_interested",
@@ -409,6 +414,15 @@ survey_df_e$edu <- factor(survey_df_e$edu, ordered = TRUE,
                                      "Master",
                                      "PhD"))
 
+survey_df_e$interest <- factor(survey_df_e$interest, ordered = TRUE,
+                               levels = c("Not_interested",
+                                          "Could_be_interested",
+                                          "Is_ready"))
+
+
+survey_df_e %>% 
+  filter(interest == "") %>% 
+  select(date)
 
 survey_df_c <- survey_df %>%
   filter(grouping != "Active_member") %>% 
@@ -1018,7 +1032,34 @@ lik_plot(t_g6, my_df_names_c_inv, mylevels_c_inv,
 
 
 
+survey_df_c <- survey_df_c %>% 
+  mutate(edu_num = unclass(survey_df_c$edu))
 
+tidy_survey_df_c <- survey_df_c %>% 
+  select(edu_num, p1:g6, neighb) %>% 
+  data.matrix() %>% 
+  as_data_frame() %>% 
+  gather(key, value, -edu_num)
+
+tidy_survey_df_c %>%
+  group_by(key, value) %>%
+  summarize(edu_num = mean(edu_num, na.rm = TRUE)) %>%
+  ggplot(aes(value, edu_num, color = key)) +
+  geom_line(size = 1.2, show.legend = FALSE, alpha = 0.5) +
+  geom_point() +
+  labs(title = "Relationship btw education and answers to likert scale questions",
+       x = "Answer to likert scale question", y = "Mean education") +
+  facet_wrap(~factor(key, ordered = T,
+                     levels = c("p1", "p2", "p3", "p4", "p5", "g1", "g2",
+                                "g3", "g4", "g5", "g6", "neighb")), nrow = 3) +
+  theme_ipsum_rc() +
+  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
+  theme(axis.text.y = element_text(hjust = 0)) +
+  theme(legend.position = "none") +
+  theme(plot.margin = unit(c(1,1,1,0), "cm")) +
+  theme(
+    panel.grid.minor.y = element_blank()
+  )
 
 
 
@@ -1326,7 +1367,7 @@ p_semfit %>%
 
 survey_df_c_mat <- survey_df_c %>% 
   filter(gender %in% c("Female", "Male")) %>% 
-  filter(invest != "") %>% 
+  # filter(invest != "") %>% 
   mutate(interest_binary = ifelse(interest == "Not_interested",
                                   0,
                                   1)) %>% 
@@ -1343,8 +1384,8 @@ summary(simple_glm)
 # interest_binary ~ . when interest = "Is_ready_*" vs "Could_be_..."
 
 survey_df_c_mat <- survey_df_c %>% 
-  filter(gender %in% c("Female", "Male")) %>% 
-  filter(invest != "") %>% 
+  filter(gender %in% c("Female", "Male")) %>%
+  # filter(invest != "") %>%
   filter(interest != "Not_interested") %>% 
   mutate(interest_binary = ifelse(interest %in% c("Is_ready_Vol",
                                                   "Is_ready_Fund"),
@@ -1367,7 +1408,6 @@ summary(glm2)
 
 survey_df_c_mat <- survey_df_c %>% 
   filter(gender %in% c("Female", "Male")) %>% 
-  filter(invest != "") %>% 
   filter(interest != "Not_interested") %>% 
   mutate(interest_binary = ifelse(interest %in% c("Is_ready_Vol",
                                                   "Could_be_interested_Vol"),
@@ -1381,6 +1421,21 @@ glm3 <- glm(interest_binary ~ .,  family = "binomial",
                   data = survey_df_c_mat)
 
 summary(glm3)
+
+# invest_binary ~ . when interest = "..._Fund" vs "..._Vol"
+
+survey_df_c_mat <- survey_df_c %>% 
+  filter(gender %in% c("Female", "Male")) %>% 
+  filter(invest != "") %>%
+  mutate(invest_binary = ifelse(invest == "0", 0, 1)) %>% 
+  select(invest_binary, language, p1:edu, -invest) %>% 
+  data.matrix() %>% 
+  as_data_frame()
+
+glm1b <- glm(invest_binary ~ .,  family = "binomial", 
+            data = survey_df_c_mat)
+
+summary(glm1b)
 
 
 # interest_binary ~ . when interest = "Not_interested" vs rest when using latent

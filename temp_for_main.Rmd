@@ -117,9 +117,13 @@ lut_e_int_eng <- c("I am not interested in joining a civic crowdfunding platform
                    "I could be interested to join a civic crowdfunding platform." = "Could_be_interested",
                    "I am ready to join a civic crowdfunding platform." = "Is_ready")
 
-lut_e_int_nl <- c("Ik ben niet geinteresseerd bij het toetreden van een ‘civic crowdfunding’ platform." = "Not_interested",
-                  "Ik zou geinteresseerd kunnen zijn in het toetreden van een ‘civic crowdfunding’ platform." = "Could_be_interested",
-                  "Ik wil deel uitmaken van een ‘civic crowdfunding’ platform." = "Is_ready")
+survey_df$e_interest_nl <- str_replace(survey_df$e_interest_nl,
+                                       pattern = "een " %R% ANY_CHAR %R% "civic crowdfunding" %R% ANY_CHAR %R% " platform",
+                                       replacement = "een civic crowdfunding platform")
+
+lut_e_int_nl <- c("Ik ben niet geinteresseerd bij het toetreden van een civic crowdfunding platform." = "Not_interested",
+                  "Ik zou geinteresseerd kunnen zijn in het toetreden van een civic crowdfunding platform." = "Could_be_interested",
+                  "Ik wil deel uitmaken van een civic crowdfunding platform." = "Is_ready")
 
 lut_e_int_fr <- c("Je ne suis pas intéressé.e par l'adhésion à une plateforme de crowdfunding citoyen." = "Not_interested",
                   "Je pourrais être intéressé.e par l'adhésion à une plateforme de crowdfunding citoyen." = "Could_be_interested",
@@ -452,6 +456,11 @@ survey_df_e$edu <- factor(survey_df_e$edu, ordered = TRUE,
                                      "Master",
                                      "PhD"))
 
+survey_df_e$interest <- factor(survey_df_e$interest, ordered = TRUE,
+                               levels = c("Not_interested",
+                                          "Could_be_interested",
+                                          "Is_ready"))
+
 survey_df_c <- survey_df %>%
   filter(grouping != "Active_member") %>% 
   select(date, lang, grouping, c_interest:ec_edu)
@@ -546,130 +555,27 @@ survey_df_j$resp_type <- factor(survey_df_j$resp_type,
 
 ```
 
-# Part 1 - Citizens
+# Part II - Entrepreneurs
 
 # Exploratory Data Analysis
 
-Now that we have imported and cleaned the data, we can start doing some exploratory analysis.
-
 ### Control variables
 
-In the survey, we asked several questions that can be referred to as control variables, such as gender, education etc.
-
-The next few plots will decribe our sample in terms of those variables.
-
-We can create a bar plot showing the count of respondants, broken down into citizens/entrepreneurs, gender and language:
-
-```{r fig.height = 6, fig.width = 10, fig.align = "center"}
-my_cols <- brewer.pal(3, "Paired")
-
-survey_df_j %>% 
-  ggplot(aes(x = gender, fill = language)) +
-  geom_bar(alpha = 0.8) +
-  facet_wrap(~ resp_type) +
-  labs(title = "Composition of respondants") +
-  theme_ipsum_rc() +
-  scale_fill_manual(values = my_cols) +
-  theme(panel.grid.major.x = element_blank(),
-        panel.grid.minor.x = element_blank()) +
-  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
-  theme(axis.text.y = element_text(hjust = 0)) +
-  theme(plot.margin = unit(c(1,1,1,0), "cm"))
-```
-
-The corresponding table with the values is given here:
-
-```{r }
-addmargins(table(survey_df_e$language, survey_df_e$gender) %>%
-             cbind(table(survey_df_c$language, survey_df_c$gender))) %>%
-  kable() %>%
-  kable_styling(bootstrap_options = c("striped","hover"),
-                full_width = T, font_size = 14) %>%
-  column_spec(8, bold = T) %>% 
-  row_spec(4, bold = T) %>%
-  add_header_above(c(" ", "Entrepreneur" = 3, "Citizen" = 3, " " = 1))
-
-```
-
-Let's now break the count of respondants by location and education.
-
-```{r fig.height = 6, fig.width = 10, fig.align = "center"}
-my_cols <- brewer.pal(9, "BuPu")
-
-survey_df_j %>% 
-  ggplot(aes(x = loc, fill = edu)) +
-  geom_bar(alpha = 0.8) +
-  facet_wrap(~ resp_type) +
-  labs(title = "Composition of respondants") +
-  theme_ipsum_rc() +
-  scale_fill_manual(values = my_cols[2:7]) +
-  theme(panel.grid.major.x = element_blank(),
-        panel.grid.minor.x = element_blank()) +
-  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
-  theme(axis.text.y = element_text(hjust = 0)) +
-  theme(plot.margin = unit(c(1,1,1,0), "cm"))
-```
-
-The corresponding table with the values is given here:
-
-```{r }
-addmargins(table(survey_df_e$edu, survey_df_e$loc) %>%
-             cbind(table(survey_df_c$edu, survey_df_c$loc))) %>%
-  kable() %>%
-  kable_styling(bootstrap_options = c("striped","hover"),
-                full_width = T, font_size = 14) %>%
-  column_spec(8, bold = T) %>% 
-  row_spec(7, bold = T) %>%
-  add_header_above(c(" ", "Entrepreneur" = 3, "Citizen" = 3, " " = 1))
-
-```
-
-Finally, we can break the count of respondants by location and age:
-
-```{r fig.height = 6, fig.width = 10, fig.align = "center"}
-my_cols <- brewer.pal(9, "YlGnBu")
-
-survey_df_j %>% 
-  ggplot(aes(x = loc, fill = age)) +
-  geom_bar(alpha = 0.8) +
-  facet_wrap(~ resp_type) +
-  labs(title = "Composition of respondants") +
-  theme_ipsum_rc() +
-  scale_fill_manual(values = my_cols[3:9]) +
-  theme(panel.grid.major.x = element_blank(),
-        panel.grid.minor.x = element_blank()) +
-  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
-  theme(axis.text.y = element_text(hjust = 0)) +
-  theme(plot.margin = unit(c(1,1,1,0), "cm"))
-```
-
-The corresponding table with the values is given here:
-
-```{r }
-addmargins(table(survey_df_e$age, survey_df_e$loc) %>%
-             cbind(table(survey_df_c$age, survey_df_c$loc))) %>%
-  kable() %>%
-  kable_styling(bootstrap_options = c("striped","hover"),
-                full_width = T, font_size = 14) %>%
-  column_spec(8, bold = T) %>% 
-  row_spec(10, bold = T) %>%
-  add_header_above(c(" ", "Entrepreneur" = 3, "Citizen" = 3, " " = 1))
-
-```
+The EDA of the control variables for the entrepreneurs was actually shared with the EDA of the control variables for the citizens. Please refer back to that section if needed.
 
 ### Dependent and independent variables
 
-Concerning the citizens, the objective of this survey is to test two hypotheses that were derived from our qualitative research:
+Concerning the entrepeneurs (active members of a local citizens initiative, social project or social organization), the objective of this survey is to test two hypotheses that were derived from our qualitative research:
 
-1. H3: The need for more participation in debates on public issues is positively correlated with the interest to support citizens initiatives.
-2. H4: A positive opinion on projects that are co-created by social entrepreneurs and the local government through civic crowdfunding platforms is positively correlated with the interest to support citizens initiatives.
+1. H1: A more participative platform is positively correlated with the interest to join a civic crowdfunding platform.
+2. H2: A positive opinion on projects that are co-created by social entrepreneurs and the local government is positively correlated with the interest to join a civic crowdfunding platform.
 
-The interest to support citizens initiatives is our dependent variable (this is the outcome that BrusselsTogether would like to improve) and is measured by the question shown in the table below. Also shown in this table is the related variable name in the R code.
+The interest to join a civic crowdfunding platform is thus our dependent variable (this is the outcome that BrusselsTogether would like to improve) and is measured by the question shown in the table below. Also shown in this table is the related variable name in the R code.
 
 ```{r}
-x <- list(q = names(lut_c_int_eng)[c(1, 3, 2, 5, 4)], v = levels(survey_df_c$interest)) %>% as_data_frame()
-colnames(x) <- c(header_lookup$google_f_header[16], "variable_name")
-x %>% 
+x <- list(q = names(lut_e_int_eng), v = levels(survey_df_e$interest)) %>% as_data_frame()
+colnames(x) <- c(header_lookup$google_f_header[4], "variable_name")
+x %>%
   kable() %>%
   kable_styling(bootstrap_options = c("striped","hover"),
                 full_width = F, position = "left", font_size = 14)
@@ -678,7 +584,7 @@ x %>%
 The answers are distributed as shown in the figure below:
 
 ```{r fig.height = 2.9, fig.width = 10, fig.align = "center"}
-survey_df_c %>%
+survey_df_e %>%
   count(interest) %>%
   rename(interest_count = n) %>%
   mutate(interest = reorder(interest, interest_count)) %>%
@@ -697,7 +603,7 @@ survey_df_c %>%
 ```{r}
 options(scipen = 999, digits = 2)
 
-survey_df_c %>% 
+survey_df_e %>% 
   count(interest) %>% 
   mutate(total = sum(n),
          percent = n / total) %>% 
@@ -708,19 +614,19 @@ survey_df_c %>%
                 full_width = F, position = "left", font_size = 14)
 ```
 
-The independent variables (the need for more participation in debates on public issues for H3 and the opinion on projects that are co-created by social entrepreneurs and the local government through civic crowdfunding platforms for H4) are what we think could be drivers for the dependent variable. If the correlations are verified, then we could provide BrusselsTogether with actionnable recommendations, such as making the platform more participative or playing a role of intermediary between citizens initiatives and the local authorities.
+The independent variables (the appeal of a more participative platform for H1 and the opinion on projects that are co-created by social entrepreneurs and the local government through civic crowdfunding platforms for H2) are what we think could be drivers for the dependent variable (although we could not make causal inference from an observational study like this one). If the correlations are verified, then we could provide BrusselsTogether with actionnable recommendations, such as making the platform more participative or playing a role of intermediary between citizens initiatives and the local authorities.
 
-For each of the two independent variables, we measured a set of questions which, in our opinion, should reflect their corresponding independent variable. In this case, we could say that the independent variables are latent variables that are each measured by a set of several items. We will dig more into the idea of latent variable in the chapter "Confirmatory Factor Analysis".
+For each of the two independent variables, we asked a set of questions which, in our opinion, should reflect their corresponding independent variable. In this case, we could say that the independent variables are latent variables that are each measured by a set of several items.
 
-The table below displays the items and their related variable name in the R code. The items related to the need for more participation in debates on public issues are `p1` to `p5` and the items related to opinion on projects that are co-created by social entrepreneurs and the local government through civic crowdfunding platforms are `g1` to `g6`.
+The table below displays the items and their related variable name in the R code. The items related to the appeal of a more participative platform are `p1` to `p5` and the items related to opinion on projects that are co-created by social entrepreneurs and the local government through civic crowdfunding platforms are `g1` to `g6`.
 
-Additionnaly, we asked the respondants whether their interest in contributing to the future of my neighborhood had increased in the past several years (variable name `neighb`).
+Additionnaly, we asked the respondants whether their interest in contributing to the future of their neighborhood had increased in the past several years (variable name `neighb`).
 
 All of those items were measured on a 5-points Likert scale, from "strongly disagree" to "strongly agree".
 
 ```{r}
-meta <- data_frame(question = header_lookup$google_f_header[c(17:27, 29)],
-                   variable_name = names(survey_df_c)[c(5:15, 17)])
+meta <- data_frame(question = header_lookup$google_f_header[c(5:15, 29)],
+                   variable_name = names(survey_df_e)[c(5:16)])
 
 meta %>% 
   kable() %>% 
@@ -728,7 +634,7 @@ meta %>%
                 full_width = T, font_size = 14)
 ```
 
-The answers are distributed as shown in the two plots below:
+The answers are distributed as shown in the three plots below:
 
 ```{r}
 lik_plot <- function(t, my_df_names, mylevels, factor_levels, p_title) {
@@ -818,89 +724,94 @@ lik_plot <- function(t, my_df_names, mylevels, factor_levels, p_title) {
 ```
 
 ```{r fig.height = 5.5, fig.width = 10, fig.align = "center"}
-questions_c <- header_lookup$google_f_header[17:27]
-quest_code_c <- names(survey_df_c)[5:15]
-survey_df_c_df <- as.data.frame(survey_df_c)
-names(survey_df_c_df)[5:15] <- questions_c
+questions_e <- header_lookup$google_f_header[5:15]
+quest_code_e <- names(survey_df_e)[5:15]
+survey_df_e_df <- as.data.frame(survey_df_e)
+names(survey_df_e_df)[5:15] <- questions_e
 
 
 
-my_df_names_c_p <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
+my_df_names_e_p <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
                      "Agree", "Strongly agree")
-mylevels_c_p <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
+mylevels_e_p <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
                   "Agree", "Strongly agree")
-factor_levels_c_p <- c("Personally funding a citizen's initiative is enough to satisfy my desire to engage in this project.",
-                       "I would like to participate in debates on local public issues.",
+factor_levels_e_p <- c("Face-to-face interactions are necessary for collective action.",
+                       "For most citizens on a civic crowdfunding platform, personnally funding a citizen's initiative is enough to satisfy their desire to engage in this project.",
+                       "Citizens would like to participate in debates on local public issues that they care about.",
                        "It is relatively easy for citizens to find places where local public issues are collectively debated.",
-                       "I would be more inclined to contribute financially to a project on a civic crowdfunding platform if I had the possibility to express my disagreement about some aspects of the project.",
-                       "Face-to-face interactions are necessary for collective action.")
+                       "I would welcome the possibility for citizens on a crowdfunding platform to express their disagreement about some aspects of the projects they contribute to financially.")
 
-temp_c_p <- survey_df_c_df[,5:9]
+temp_e_p <- survey_df_e_df[,5:9]
 
-temp_c_p_gathered <- temp_c_p %>% 
+temp_e_p_gathered <- temp_e_p %>% 
   gather(key = "question", value = "answer")
 
-temp_c_p_gathered$answer <- factor(temp_c_p_gathered$answer, ordered = T,
-                                   levels = mylevels_c_p)
+temp_e_p_gathered$answer <- factor(temp_e_p_gathered$answer, ordered = T,
+                                   levels = mylevels_e_p)
 
-t_c_p <- prop.table(table(temp_c_p_gathered$question,
-                          temp_c_p_gathered$answer), 1)
-c_p_title <- "\n\nCitizens - Participative questions\n"
+t_e_p <- prop.table(table(temp_e_p_gathered$question,
+                          temp_e_p_gathered$answer), 1)
+e_p_title <- "\n\nEntrepreneurs - Participative questions\n"
 
-lik_plot(t_c_p, my_df_names_c_p, mylevels_c_p, factor_levels_c_p, c_p_title)
+lik_plot(t_e_p, my_df_names_e_p, mylevels_e_p, factor_levels_e_p, e_p_title)
 ```
 
 ```{r fig.height = 5.5, fig.width = 10, fig.align = "center"}
-my_df_names_c_g <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
+my_df_names_e_g <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
                  "Agree", "Strongly agree")
-mylevels_c_g <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
+mylevels_e_g <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
               "Agree", "Strongly agree")
-factor_levels_c_g <- c("Civic crowdfunding represents a direct threat to public funding of services.",
-                       "I regard crowdfunded citizen's initiatives as a sort of _Do-It-Yourself government_.",
+factor_levels_e_g <- c("Civic crowdfunding represents a direct threat to the funding of public goods and services by the local government.",
+                       "I regard crowdfunded citizen's initiatives as a sort of_Do-It-Yourself government_.",
                        "The local government is able to identify the projects that are most wanted by citizens.",
                        "Civic crowdfunding platforms could play a role of intermediary between citizen's initiatives and the local government.",
                        "General interest issues are addressed more efficiently by crowdfunded citizen's initiatives than by the local government.",
                        "General interest issues are addressed more efficiently by crowdfunded citizen's initiatives than by non-profit organizations subsidized by the local government.")
 
-temp_c_g <- survey_df_c_df[,10:15]
+temp_e_g <- survey_df_e_df[,10:15]
 
-temp_c_g_gathered <- temp_c_g %>% 
+temp_e_g_gathered <- temp_e_g %>% 
   gather(key = "question", value = "answer")
 
-temp_c_g_gathered$answer <- factor(temp_c_g_gathered$answer, ordered = T,
-                                   levels = mylevels_c_g)
+temp_e_g_gathered$answer <- factor(temp_e_g_gathered$answer, ordered = T,
+                                   levels = mylevels_e_g)
 
-t_c_g <- prop.table(table(temp_c_g_gathered$question,
-                          temp_c_g_gathered$answer), 1)
-c_g_title <- "Citizens - Government questions\n"
+t_e_g <- prop.table(table(temp_e_g_gathered$question,
+                          temp_e_g_gathered$answer), 1)
+e_g_title <- "Entrepreneurs - Government questions\n"
 
-lik_plot(t_c_g, my_df_names_c_g, mylevels_c_g, factor_levels_c_g, c_g_title)
+lik_plot(t_e_g, my_df_names_e_g, mylevels_e_g, factor_levels_e_g, e_g_title)
 ```
 
 ```{r fig.height = 2.7, fig.width = 10, fig.align = "center"}
 questions_neighb <- header_lookup$google_f_header[29]
-quest_code_neighb <- names(survey_df_c)[17]
-names(survey_df_c_df)[17] <- questions_neighb
+quest_code_neighb <- names(survey_df_e)[16]
+names(survey_df_e_df)[16] <- questions_neighb
 
-my_df_names_c_neighb <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
+my_df_names_e_neighb <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
                           "Agree", "Strongly agree")
-mylevels_c_neighb <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
+mylevels_e_neighb <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
                        "Agree", "Strongly agree")
-factor_levels_c_neighb <- c("My interest in contributing to the future of my neighborhood has increased in the past several years.")
+factor_levels_e_neighb <- c("My interest in contributing to the future of my neighborhood has increased in the past several years.")
 
-temp_c_neighb <- as.data.frame(survey_df_c_df[,17])
-names(temp_c_neighb) <- "My interest in contributing to the future of my neighborhood has increased in the past several years."
+temp_e_neighb <- as.data.frame(survey_df_e_df[,16])
+names(temp_e_neighb) <- "My interest in contributing to the future of my neighborhood has increased in the past several years."
 
-temp_c_neighb_gathered <- temp_c_neighb %>% 
+temp_e_neighb_gathered <- temp_e_neighb %>% 
   gather(key = "question", value = "answer")
 
-temp_c_neighb_gathered$answer <- factor(temp_c_neighb_gathered$answer,
+temp_e_neighb_gathered$answer <- factor(temp_e_neighb_gathered$answer,
                                         ordered = T,
-                                        levels = mylevels_c_neighb)
+                                        levels = mylevels_e_neighb)
 
-t_c_neighb <- prop.table(table(temp_c_neighb_gathered$question,
-                          temp_c_neighb_gathered$answer), 1)
-c_neighb_title <- "Citizens - Interest in future of neighb. question\n"
+t_e_neighb <- prop.table(table(temp_e_neighb_gathered$question,
+                          temp_e_neighb_gathered$answer), 1)
+e_neighb_title <- "Citizens - Interest in future of neighb. question\n"
 
-lik_plot(t_c_neighb, my_df_names_c_neighb, mylevels_c_neighb, factor_levels_c_neighb, c_neighb_title)
+lik_plot(t_e_neighb, my_df_names_e_neighb, mylevels_e_neighb, factor_levels_e_neighb, e_neighb_title)
 ```
+
+###  Distribution of answers for independent variables broken down by interest
+
+We can break down the distribution of answers related to the independent variables by interest in joining a civic crowdfunding platform.
+
