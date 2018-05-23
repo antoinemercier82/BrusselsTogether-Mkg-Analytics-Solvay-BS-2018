@@ -728,7 +728,7 @@ meta %>%
                 full_width = T, font_size = 14)
 ```
 
-The answers are distributed as shown in the two plots below:
+The answers are distributed as shown in the three plots below:
 
 ```{r}
 lik_plot <- function(t, my_df_names, mylevels, factor_levels, p_title) {
@@ -876,6 +876,35 @@ c_g_title <- "Citizens - Government questions\n"
 
 lik_plot(t_c_g, my_df_names_c_g, mylevels_c_g, factor_levels_c_g, c_g_title)
 ```
+
+```{r fig.height = 2.7, fig.width = 10, fig.align = "center"}
+questions_neighb <- header_lookup$google_f_header[29]
+quest_code_neighb <- names(survey_df_c)[17]
+names(survey_df_c_df)[17] <- questions_neighb
+
+my_df_names_c_neighb <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
+                          "Agree", "Strongly agree")
+mylevels_c_neighb <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
+                       "Agree", "Strongly agree")
+factor_levels_c_neighb <- c("My interest in contributing to the future of my neighborhood has increased in the past several years.")
+
+temp_c_neighb <- as.data.frame(survey_df_c_df[,17])
+names(temp_c_neighb) <- "My interest in contributing to the future of my neighborhood has increased in the past several years."
+
+temp_c_neighb_gathered <- temp_c_neighb %>% 
+  gather(key = "question", value = "answer")
+
+temp_c_neighb_gathered$answer <- factor(temp_c_neighb_gathered$answer,
+                                        ordered = T,
+                                        levels = mylevels_c_neighb)
+
+t_c_neighb <- prop.table(table(temp_c_neighb_gathered$question,
+                          temp_c_neighb_gathered$answer), 1)
+c_neighb_title <- "Citizens - Interest in future of neighb. question\n"
+
+lik_plot(t_c_neighb, my_df_names_c_neighb, mylevels_c_neighb, factor_levels_c_neighb, c_neighb_title)
+```
+
 
 Finally, we asked how much the respondants were already investing in citizens initiatives. This could be regarded as a secondary dependent variable that captures the interest in citizens initiatives.
 
@@ -1036,6 +1065,16 @@ g6_title <- "General interest issues are addressed more efficiently\nby crowdfun
 lik_plot(t_g6, my_df_names, mylevels, factor_levels, g6_title)
 ```
 
+Here below is the plot related to the "interest in the future of my neighborhood" question.
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_neighb <- prop.table(table(survey_df_c$interest, survey_df_c$neighb), 1)
+neighb_title <- "\nMy interest in contributing to the future of my neighborhood\nhas increased in the past several years.\n"
+
+lik_plot(t_neighb, my_df_names, mylevels, factor_levels, neighb_title)
+```
+
+
 
 ###  Distribution of answers for independent variables broken down by past investment
 
@@ -1146,6 +1185,75 @@ lik_plot(t_g6, my_df_names_c_inv, mylevels_c_inv,
          factor_levels_c_inv, g6_title)
 ```
 
+Here below is the plot related to the "interest in the future of my neighborhood" question.
+
+```{r fig.height = 4, fig.width = 10, fig.align = "center"}
+t_neighb <- prop.table(table(survey_df_c_inv$invest, survey_df_c_inv$neighb), 1)
+neighb_title <- "\nMy interest in contributing to the future of my neighborhood\nhas increased in the past several years.\n"
+
+lik_plot(t_neighb, my_df_names_c_inv, mylevels_c_inv,
+         factor_levels_c_inv, neighb_title)
+```
+
+###  Distribution of answers for independent variables broken down by education
+
+Here below is a plot showing the education vs answers to independent variables questions, broken down by independent variables questions.
+
+```{r fig.height = 7, fig.width = 10, fig.align = "center"}
+survey_df_c <- survey_df_c %>% 
+  mutate(edu_num = unclass(survey_df_c$edu))
+
+tidy_survey_df_c <- survey_df_c %>% 
+  select(edu_num, p1:g6, neighb) %>% 
+  data.matrix() %>% 
+  as_data_frame() %>% 
+  gather(key, value, -edu_num)
+
+tidy_survey_df_c %>%
+  group_by(key, value) %>%
+  summarize(edu_num = mean(edu_num, na.rm = TRUE)) %>%
+  ggplot(aes(value, edu_num, color = key)) +
+  geom_line(size = 1.2, show.legend = FALSE, alpha = 0.5) +
+  geom_point() +
+  labs(title = "Relationship btw education and answers to likert scale questions",
+       x = "Answer to likert scale question", y = "Mean education") +
+  facet_wrap(~factor(key, ordered = T,
+                     levels = c("p1", "p2", "p3", "p4", "p5", "g1", "g2",
+                                "g3", "g4", "g5", "g6", "neighb")), nrow = 3) +
+  theme_ipsum_rc() +
+  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
+  theme(axis.text.y = element_text(hjust = 0)) +
+  theme(legend.position = "none") +
+  theme(plot.margin = unit(c(1,1,1,0), "cm")) +
+  theme(
+    panel.grid.minor.y = element_blank()
+  )
+```
+
+For this plot, the education is coded as an integer value as shown in the following table (see the column "edu_num"). This table also shows the count for each level (under the column "n").
+
+```{r}
+options(scipen = 999, digits = 3) # Print fewer digits
+
+survey_df_c %>% 
+  count(edu, edu_num) %>%
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped","hover"),
+                full_width = F, position = "left", font_size = 14)
+```
+
+Here below is a reminder of the questions and their variable names.
+
+```{r}
+meta <- data_frame(question = header_lookup$google_f_header[c(17:27, 29)],
+                   variable_name = names(survey_df_c)[c(5:15, 17)])
+
+meta %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped","hover"),
+                full_width = T, font_size = 14)
+```
+
 ###  Distribution of answers for independent variables broken down by age
 
 Here below is a plot showing the mean age vs answers to independent variables questions, broken down by independent variables questions.
@@ -1185,18 +1293,17 @@ facet_wrap(~factor(key, ordered = T,
   theme(plot.margin = unit(c(1,1,1,0), "cm"))
 ```
 
-Here below is a reminder of the questions and their variable names.
+For this plot, the age is coded as an integer value as shown in the following table (see the column "age_num"). This table also shows the count for each level (under the column "n").
 
 ```{r}
-meta <- data_frame(question = header_lookup$google_f_header[c(17:27, 29)],
-                   variable_name = names(survey_df_c)[c(5:15, 17)])
+options(scipen = 999, digits = 3) # Print fewer digits
 
-meta %>% 
+survey_df_c %>% 
+  count(age, age_num) %>%
   kable() %>% 
   kable_styling(bootstrap_options = c("striped","hover"),
-                full_width = T, font_size = 14)
+                full_width = F, position = "left", font_size = 14)
 ```
-
 # Logistic regression modeling
 
 ### Introduction

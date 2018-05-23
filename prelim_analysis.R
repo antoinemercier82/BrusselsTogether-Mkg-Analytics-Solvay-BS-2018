@@ -651,6 +651,10 @@ quest_code_c <- names(survey_df_c)[5:15]
 survey_df_c_df <- as.data.frame(survey_df_c)
 names(survey_df_c_df)[5:15] <- questions_c
 
+questions_neighb <- header_lookup$google_f_header[29]
+quest_code_neighb <- names(survey_df_c)[17]
+names(survey_df_c_df)[17] <- questions_neighb
+
 my_df_names <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
                  "Agree", "Strongly agree")
 mylevels <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
@@ -703,7 +707,7 @@ factor_levels_c_g <- c("Civic crowdfunding represents a direct threat to public 
                        "General interest issues are addressed more efficiently by crowdfunded citizen's initiatives than by non-profit organizations subsidized by the local government.")
 
 temp_c_g <- survey_df_c_df[,10:15]
-
+head(temp_c_g)
 temp_c_g_gathered <- temp_c_g %>% 
   gather(key = "question", value = "answer")
 
@@ -713,6 +717,30 @@ temp_c_g_gathered$answer <- factor(temp_c_g_gathered$answer, ordered = T,
 t_c_g <- prop.table(table(temp_c_g_gathered$question,
                           temp_c_g_gathered$answer), 1)
 c_g_title <- "Citizens - Government questions\n"
+
+
+
+
+
+my_df_names_c_neighb <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
+                          "Agree", "Strongly agree")
+mylevels_c_neighb <- c("Strongly disagree", "Disagree", "Neither agree nor disagree",
+                       "Agree", "Strongly agree")
+factor_levels_c_neighb <- c("My interest in contributing to the future of my neighborhood has increased in the past several years.")
+
+temp_c_neighb <- as.data.frame(survey_df_c_df[,17])
+names(temp_c_neighb) <- "My interest in contributing to the future of my neighborhood has increased in the past several years."
+
+temp_c_neighb_gathered <- temp_c_neighb %>% 
+  gather(key = "question", value = "answer")
+
+temp_c_neighb_gathered$answer <- factor(temp_c_neighb_gathered$answer,
+                                        ordered = T,
+                                        levels = mylevels_c_neighb)
+
+t_c_neighb <- prop.table(table(temp_c_neighb_gathered$question,
+                          temp_c_neighb_gathered$answer), 1)
+c_neighb_title <- "Citizens - Interest in future of neighb. question\n"
 
 
 
@@ -1146,13 +1174,10 @@ survey_df_c_mat2 <- cbind(survey_df_c_mat, pfit3)
 
 head(survey_df_c_mat2)
 
+
 survey_df_c_mat2 %>% 
   ggplot(aes(x = partcip_will, y = civic_crowd_gov)) +
   geom_point()
-
-nrow(survey_df_c)
-nrow(survey_df_c_mat2)
-nrow(pfit3)
 
 survey_df_c <- survey_df_c %>% 
   filter(gender %in% c("Female", "Male")) %>% 
@@ -1239,6 +1264,7 @@ survey_df_c %>%
   theme(plot.title = element_text(size = 14, hjust = 0.5)) +
   theme(axis.text.y = element_text(hjust = 0)) +
   theme(plot.margin = unit(c(1,1,1,0), "cm"))
+
 survey_df_c %>% 
   ggplot(aes(y = partcip_will, x = invest, fill = invest)) +
   geom_boxplot(alpha = .5) +
@@ -1250,8 +1276,6 @@ survey_df_c %>%
         panel.grid.minor.y = element_blank()) +
   coord_flip()
 
-
-
 survey_df_c %>% 
   ggplot(aes(y = civic_crowd_gov, x = invest, fill = invest)) +
   geom_boxplot(alpha = .5) +
@@ -1262,6 +1286,19 @@ survey_df_c %>%
   theme(panel.grid.major.y = element_blank(),
         panel.grid.minor.y = element_blank()) +
   coord_flip()
+names(survey_df_c_mat)
+library(psych)
+
+survey_df_c_mat %>% 
+  select(p1:g6) %>% 
+  scree()
+
+fac1 <- survey_df_c_mat %>% 
+  select(p1:g6) %>% 
+  factanal(2, rotation = "promax")
+
+fl <- round(unclass(fac1$loadings), 1)
+fl
 
 sem_model <- "
 partcip_will =~ p2 + p1 + p3 + p4 + p5
@@ -1282,78 +1319,6 @@ p_semfit %>%
   filter(op == "~")
 
 
-ggplot(survey_df_c, aes(x = partcip_will)) +
-  geom_histogram(fill = "#512DA8")
-
-ggplot(survey_df_c, aes(x = civic_crowd_gov)) +
-  geom_histogram(bins = 10)
-
-ggplot(survey_df_c, aes(x = partcip_will,
-                        col = interest,
-                        fill = interest)) + 
-  geom_density(alpha = .5)
-
-ggplot(survey_df_c, aes(x = civic_crowd_gov,
-                        col = interest,
-                        fill = interest)) + 
-  geom_density(alpha = .5)
-
-unique(round(survey_df_c$partcip_will, 1))
-
-unique(round(survey_df_c$civic_crowd_gov, 2))
-
-survey_df_c %>% 
-  count(interest) %>% 
-  mutate(total = sum(n),
-         percent = n / total) %>% 
-  select(interest, n, percent) %>% 
-  arrange(desc(n))
-
-str(survey_df_c)
-unique(survey_df_c$interest)
-
-names(survey_df_c)
-simple_glm <- survey_df_c %>%
-  mutate(interest_binary = ifelse(interest == "Is_ready_Fund",
-                                  0,
-                                  1)) %>% 
-  select(interest_binary, partcip_will) %>%
-  glm(interest_binary ~ partcip_will,
-      family = "binomial",
-      data = .)
-
-summary(simple_glm)
-
-
-simple_glm <- survey_df_c %>%
-  filter(interest != "Not_interested") %>% 
-  mutate(interest_binary = ifelse(interest %in% c("Is_ready_Vol",
-                                                  "Is_ready_Fund"),
-                                  1,
-                                  0)) %>% 
-  select(interest_binary, partcip_will) %>%
-  glm(interest_binary ~ partcip_will,
-      family = "binomial",
-      data = .)
-
-summary(simple_glm)
-
-
-simple_glm <- survey_df_c %>%
-  filter(interest != "Not_interested") %>% 
-  mutate(interest_binary = ifelse(interest %in% c("Is_ready_Vol",
-                                                  "Is_ready_Fund"),
-                                  1,
-                                  0)) %>% 
-  select(interest_binary, civic_crowd_gov) %>%
-  glm(interest_binary ~ civic_crowd_gov,
-      family = "binomial",
-      data = .)
-
-str(survey_df_c)
-summary(simple_glm)
-
-levels(survey_df_c$interest)
 
 ### Start
 
