@@ -59,10 +59,18 @@ library(rebus)
 
 ### Import
 
-There are only two input files (`Citizen initiative.csv` and  `header_lookup.txt`) which can be retrieved from the Github page mentionned above.
+There are only three input files (`Citizen initiative.csv` which comes straight from Google Forms, `Replacement_of_csv_header.txt` and  `header_lookup.txt`) which can be retrieved from the Github page mentionned above.
 
 ```{r message = FALSE, warning = FALSE}
-survey_df <- read_csv("inputs/Citizen initiative.csv")
+survey_df <- read_delim("inputs/Citizen initiative.csv",
+                   delim = ",", skip = 1,
+                   col_names = FALSE)
+
+temp_header <- read_delim("inputs/Replacement_of_csv_header.txt",
+                   delim = ",")
+
+colnames(survey_df) <- colnames(temp_header)
+
 header_lookup <- read_delim("inputs/header_lookup.txt", delim = ";")
 # names(survey_df) <- header_lookup$df_header
 ```
@@ -70,7 +78,7 @@ header_lookup <- read_delim("inputs/header_lookup.txt", delim = ";")
 
 ### Preprocessing
 
-The preprocessing code is available below, although in order to improve the clarity of this document, **it is better to hide this code** (click on the `Hide` button on the right).
+The preprocessing code is available below. The reader can have a look by clicking on the `Code` button on the right. We choose not to explain explicitely the details of data cleaning and tidying, in order to preserve the clarity of this document.
 
 ```{r message = FALSE, warning = FALSE}
 # Dates preprocessing
@@ -280,7 +288,7 @@ survey_df$ec_neighb_fr <- lut_likert_fr[survey_df$ec_neighb_fr]
 
 # Location question preprocessing
 lut_loc_eng <- c("Brussels" = "Brussels",
-                 "Outside Belgium" = "Brussels",
+                 "Outside Belgium " = "Brussels",
                  "Flanders" = "Flanders",
                  "Wallonia" = "Wallonia")
 
@@ -292,6 +300,7 @@ lut_loc_nl <- c("Brussel" = "Brussels",
                 "Wallonië" = "Wallonia")
 
 lut_loc_fr <- c("Bruxelles-Capitale" = "Brussels",
+                "cameroun/ngaoundéré" = "Brussels",
                 "Flandre" = "Flanders",
                 "Wallonie" = "Wallonia")
 
@@ -1039,7 +1048,7 @@ survey_df_e %>%
 
 Similar to what we did in Part I for the citizens, we are going to fit a series of multiple binary logistic regression model in order to see which predictors (in our case the independent variable questions) are associated with the likelihood of entrepreneurs to be interested in joining a civic crowdfunding platforms.
 
-Here again, our dependent variable has more than two classes ("Not interested", "Could be interested" and "Ready to fund"). Therefore, we will fit several models after having split our dependent variable classes into two groups, in several ways.
+Here again, our dependent variable has more than two classes (three in this case: "Not interested", "Could be interested" and "Ready to join"). Therefore, we will fit several models after having split our dependent variable classes into two groups, in several ways.
 
 ### Logistic regression with Interest as the target variable
 
@@ -1050,7 +1059,7 @@ In this section, we will fit models with Interest (in joining a civic crowdfundi
 In the first model, we will split the Interest variable into the two following groups:
 
 * Class 0: "Not_interested";
-* Class 1: The rest of the possible classes ("Could_be_interested_Vol", "Could_be_interested_Fund", "Is_ready_Vol", "Is_ready_Fund") combined.
+* Class 1: The rest of the possible classes ("Could be interested" and "Ready to join") combined.
 
 Also, we filter out observations with gender other than Female and Male. Females are then represented by the integer value 1 and Male are represented by the integer value 2.
 
@@ -1068,16 +1077,16 @@ Finally, answers to the location and language questions have three levels:
 The first few rows of the input to the model look like this:
 
 ```{r message = FALSE, warning = FALSE}
-survey_df_c_mat <- survey_df_c %>% 
+survey_df_e_mat <- survey_df_e %>% 
   filter(gender %in% c("Female", "Male")) %>% 
   mutate(interest_binary = ifelse(interest == "Not_interested",
                                   0,
                                   1)) %>% 
-  select(interest_binary, language, p1:edu, -invest) %>% 
+  select(interest_binary, language, p1:edu) %>% 
   data.matrix() %>% 
   as_data_frame()
 
-survey_df_c_mat %>% 
+survey_df_e_mat %>% 
   head() %>% 
   kable() %>% 
   kable_styling(bootstrap_options = c("striped","hover"),
@@ -1094,259 +1103,32 @@ summary(glm1)
 ```
 
 
-This is a lot of output, but we are going to focus on the Coefficients table in the middle.
+In the present case, all p-values are about 1, so this model is useless. In fact, the model did not converge. This is probably due to the high imbalance in the response variable. Indeed, as already mentionned, the class "Not_interested" represents only 5% of the sample or 1 out of 39 observations.
 
-In order to be able to interpret anything meaningful, we first have to look at the p-values represented in the last column of the Ceofficients table ("Pr(>|z|)"). The p-value is used to test for statistical significance. We won't go into the theory of inference for regression, but simply put, low p-values (below 0.05) generally mean that we can rule out that the effect of the coefficient is due to chance. In other words, we are looking for coefficients for which the p-value is below 0.05.
-
-In the present case, all p-values are about 1, so this model is useless. In fact, the model did not converge. This is probably due to the high imbalance in the response variable. Indeed, as already mentionned, the class "Not_interested" represents only 5% of the sample or 7 out of 150 observations.
-
-Therefore, we cannot infer anything regarding factors that affect the likelihood of people not to be interested in civic crowdfunding platforms as opposed to being somewhat interested ("Could be interested) or definetly interested ("Is ready").
+Therefore, we cannot infer anything regarding factors that are associated with the likelihood of entrepreneurs not to be interested in joining a civic crowdfunding platform as opposed to being somewhat interested ("Could be interested) or definetly interested ("Is ready").
 
 #### Model 2
 
-In this second model, we are filtering out the observations where people are not interested in joining a civic crowdfunding platform, therefore we are now focusing on a subset of the data. Then we split the observations into the two following groups, related to the "interest" variable:
+In this second model, we are filtering out the observations where entrepeneurs are not interested in joining a civic crowdfunding platform, therefore we are now focusing on a subset of the data. Then we split the observations into the two following groups, related to the "interest" variable:
 
-* Class 0: "Could_be_interested_Vol" and "Could_be_interested_Fund";
-* Class 1: "Is_ready_Vol" and "Is_ready_Fund".
+* Class 0: "Could_be_interested";
+* Class 1: "Is_ready".
 
 The rest of the model is similar to the model 1.
 
-```{r message = FALSE, warning = FALSE}
-survey_df_c_mat <- survey_df_c %>% 
+```{r message=FALSE, warning=FALSE}
+survey_df_e_mat <- survey_df_e %>% 
   filter(gender %in% c("Female", "Male")) %>% 
   filter(interest != "Not_interested") %>% 
-  mutate(interest_binary = ifelse(interest %in% c("Is_ready_Vol",
-                                                  "Is_ready_Fund"),
-                                  1,
-                                  0)) %>% 
-  select(interest_binary, language, p1:edu, -invest) %>% 
+  mutate(interest_binary = ifelse(interest == "Is_ready", 1, 0)) %>% 
+  select(interest_binary, language, p1:edu) %>% 
   data.matrix() %>% 
   as_data_frame()
 
 glm2 <- glm(interest_binary ~ .,  family = "binomial", 
-                  data = survey_df_c_mat)
+                  data = survey_df_e_mat)
 
 summary(glm2)
 ```
 
-Now we have several variables for which the p-value of the coefficient is less than 0.05. Let's extract them into the following table, which is ordered by "estimate" in descending order:
-
-```{r}
-options(scipen = 999, digits = 3)
-
-glm2 %>% 
-  tidy() %>%
-  filter(p.value < 0.05) %>%
-  arrange(desc(estimate)) %>% 
-  kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
-                full_width = F, position = "left", font_size = 14)
-```
-
-We can interpret this table as follows:
-
-1. Since the effect size (i.e. the estimate of the coefficient) associated with the variable p2 is above zero, then people agreeing with the statement "I would like to participate in debates on local public issues." are more likely to be "ready" to fund or volunteer (they are more likely to have answered "I am ready to..." rather than "I could be interested to..."), after controlling for the other variables in the model.
-
-Let's have a look at a plot similar to what we did in the Exploratory Data Analysis, but without the category "Not interested":
-
-```{r fig.height = 4, fig.width = 10, fig.align = "center"}
-t_p2 <- prop.table(table(survey_df_c$interest[survey_df_c$interest != "Not_interested"], survey_df_c$p2[survey_df_c$interest != "Not_interested"]), 1)
-p2_title <- "\n\n\nI would like to participate in debates on local public issues.\n"
-
-lik_plot(t_p2, my_df_names, mylevels, factor_levels, p2_title)
-```
-
-This confirms visually the positive relationship identified in point 1.
-
-2. Similarly, since the effect size associated with the variable neighb is positive, then people agreeing with the statement "My interest in contributing to the future of my neighborhood has increased in the past several years." are more likely to be "ready" to fund or volunteer, after controlling for the other variables in the model.
-
-Let's have a look at a plot similar to what we did in the Exploratory Data Analysis, but without the category "Not interested":
-
-```{r fig.height = 4, fig.width = 10, fig.align = "center"}
-t_neighb <- prop.table(table(survey_df_c$interest[survey_df_c$interest != "Not_interested"], survey_df_c$neighb[survey_df_c$interest != "Not_interested"]), 1)
-neighb_title <- "\n\nMy interest in contributing to the future of my neighborhood\nhas increased in the past several years.\n"
-
-lik_plot(t_neighb, my_df_names, mylevels, factor_levels, neighb_title)
-```
-
-This confirms visually the positive relationship identified in point 2.
-
-3. Since the effect size associated with the variable age is above zero, then older people are more likely to be "ready" to fund or volunteer, after controlling for the other variables in the model.
-
-Let's have a look at a bar chart representing the proportions of interest conditionned on age group:
-
-```{r fig.height = 6, fig.width = 10, fig.align = "center"}
-my_cols <- brewer.pal(9, "YlGnBu")
-
-survey_df_c %>% 
-  filter(interest != "Not_interested") %>% 
-  ggplot(aes(x = interest, fill = age)) +
-  geom_bar(alpha = 0.8, position = "fill") +
-  labs(title = "Proportions of interest conditionned on age group", y = "Proportion") +
-  theme_ipsum_rc() +
-  scale_fill_manual(values = my_cols[3:9]) +
-  theme(panel.grid.major.x = element_blank(),
-        panel.grid.minor.x = element_blank()) +
-  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
-  theme(axis.text.y = element_text(hjust = 0)) +
-  theme(plot.margin = unit(c(1,1,1,0), "cm"))
-```
-
-This plot seems to confirm the positive relationship identified in point 3.
-
-4. Since the effect size associated with the variable g4 is negative, then people agreeing with the statement "Civic crowdfunding platforms could play a role of intermediary between citizen’s initiatives and the local government." are less likely to be "ready" to fund or volunteer (they are more likely to have answered "I could be interested to..."), after controlling for the other variables in the model.
-
-Let's have a look at a plot similar to what we did in the Exploratory Data Analysis, but without the category "Not interested":
-
-```{r fig.height = 4, fig.width = 10, fig.align = "center"}
-t_g4 <- prop.table(table(survey_df_c$interest[survey_df_c$interest != "Not_interested"], survey_df_c$g4[survey_df_c$interest != "Not_interested"]), 1)
-g4_title <- "\n\nCivic crowdfunding platforms could play a role of\nintermediary between citizen's initiatives and the local government.\n"
-
-lik_plot(t_g4, my_df_names, mylevels, factor_levels, g4_title)
-```
-
-This confirms visually the negative relationship identified in point 4.
-
-5. Finally, people agreeing with the statement "I would be more inclined to contribute financially to a project on a civic crowdfunding platform if I had the possibility to express my disagreement about some aspects of the project." are less likely to be "ready" to fund or volunteer (they are more likely to have answered "I could be interested to..."), after controlling for the other variables in the model.
-
-Let's try to confirm this visually:
-
-```{r fig.height = 4, fig.width = 10, fig.align = "center"}
-t_p4 <- prop.table(table(survey_df_c$interest[survey_df_c$interest != "Not_interested"], survey_df_c$p4[survey_df_c$interest != "Not_interested"]), 1)
-p4_title <- "\nI would be more inclined to contribute financially to\na project on a civic crowdfunding platform if I had the possibility\nto express my disagreement about some aspects of the project.\n"
-
-lik_plot(t_p4, my_df_names, mylevels, factor_levels, p4_title)
-```
-
-The negative relationship identified in the last point is less clear from this plot.
-
-#### Model 3
-
-Let's build a third model in which we are filtering out the observations where people are not interested in joining a civic crowdfunding platform, and where we split the observations into the two following groups, related to the "interest" variable:
-
-* Class 0: "Could_be_interested_Vol" and "Is_ready_Vol";
-* Class 1: "Could_be_interested_Fund" and "Is_ready_Fund".
-
-In other words, we are now interested to know what factors are associated with the difference between those willing to volunteer and those willing to fund.
-
-The rest of the model is similar to models 1 and 2.
-
-```{r message = FALSE, warning = FALSE}
-survey_df_c_mat <- survey_df_c %>% 
-  filter(gender %in% c("Female", "Male")) %>% 
-  filter(interest != "Not_interested") %>% 
-  mutate(interest_binary = ifelse(interest %in% c("Is_ready_Vol",
-                                                  "Could_be_interested_Vol"),
-                                  0,
-                                  1)) %>% 
-  select(interest_binary, language, p1:edu, -invest) %>% 
-  data.matrix() %>% 
-  as_data_frame()
-
-glm3 <- glm(interest_binary ~ .,  family = "binomial", 
-                  data = survey_df_c_mat)
-
-summary(glm3)
-```
-
-We have two variables for which the p-value of the coefficient is less than 0.05. Let's extract them into the following table, which is ordered by "estimate" in descending order:
-
-```{r}
-options(scipen = 999, digits = 3)
-
-glm3 %>% 
-  tidy() %>%
-  filter(p.value < 0.05) %>%
-  arrange(desc(estimate)) %>% 
-  kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
-                full_width = F, position = "left", font_size = 14)
-```
-
-We can interpret this table as follows:
-
-1. Since the effect size associated with the variable p4 is positive, then people agreeing with the statement "I would be more inclined to contribute financially to a project on a civic crowdfunding platform if I had the possibility to express my disagreement about some aspects of the project." are more likely to be willing to fund rather than to volunteer, after controlling for the other variables in the model.
-
-Let's have a look at a plot similar to what we did in the Exploratory Data Analysis, but without the category "Not interested" and with the class labels for the dependent variable re-ordered:
-
-```{r fig.height = 4, fig.width = 10, fig.align = "center"}
-t_p4 <- prop.table(table(survey_df_c$interest[survey_df_c$interest != "Not_interested"], survey_df_c$p4[survey_df_c$interest != "Not_interested"]), 1)
-p4_title <- "\nI would be more inclined to contribute financially to\na project on a civic crowdfunding platform if I had the possibility\nto express my disagreement about some aspects of the project.\n"
-
-factor_levels_m3 <- c("Could_be_interested_Vol", "Is_ready_Vol", "Could_be_interested_Fund", "Is_ready_Fund")
-lik_plot(t_p4, my_df_names, mylevels, factor_levels_m3, p4_title)
-```
-
-This confirms visually the positive relationship identified in point 1, and it seems to make more sense than for point 5 from the interpretation of the model 2.
-
-2. Similarly, since the effect size associated with the variable p1 is positive, then people agreeing with the statement "Personally funding a citizen’s initiative is enough to satisfy my desire to engage in this project." are more likely to be willing to fund rather than to volunteer, after controlling for the other variables in the model.
-
-Let's have a look at a plot similar to what we did in the Exploratory Data Analysis, but without the category "Not interested" and with the class labels for the dependent variable re-ordered:
-
-```{r fig.height = 4, fig.width = 10, fig.align = "center"}
-t_p1 <- prop.table(table(survey_df_c$interest[survey_df_c$interest != "Not_interested"], survey_df_c$p1[survey_df_c$interest != "Not_interested"]), 1)
-p1_title <- "\n\nPersonally funding a citizen's initiative is enough to\nsatisfy my desire to engage in this project.\n"
-
-factor_levels_m3 <- c("Could_be_interested_Vol", "Is_ready_Vol", "Could_be_interested_Fund", "Is_ready_Fund")
-lik_plot(t_p1, my_df_names, mylevels, factor_levels_m3, p1_title)
-```
-
-This confirms visually the positive relationship identified in point 2.
-
-### Logistic regression with past investment as the target variable
-
-#### Model 4
-
-In our last model, we are going to change our target variable. Instead of modeling the interest in citizens initiatives explained by all of the other variables, we will be modeling the respondants past investment in citizens initiatives.
-
-In order for this response to be binary, we will split the observations into the two following groups, related to the `invest` variable:
-
-* Class 0: "0", that is, the respondant did not report already investing in citizens initiatives;
-* Class 1: All of the other choices ("1_99", "100_199", "200_499", "500_plus").
-
-All of the other settings are the same as for the model 1.
-
-```{r}
-survey_df_c_mat <- survey_df_c %>% 
-  filter(gender %in% c("Female", "Male")) %>% 
-  filter(invest != "") %>%
-  mutate(invest_binary = ifelse(invest == "0", 0, 1)) %>% 
-  select(invest_binary, language, p1:edu, -invest) %>% 
-  data.matrix() %>% 
-  as_data_frame()
-
-glm4 <- glm(invest_binary ~ .,  family = "binomial", 
-            data = survey_df_c_mat)
-
-summary(glm4)
-```
-
-We have a single variable for which the p-value of the coefficient is less than 0.05. Let’s extract it into the following table:
-
-```{r}
-options(scipen = 999, digits = 3)
-
-glm4 %>% 
-  tidy() %>%
-  filter(p.value < 0.05) %>%
-  arrange(desc(estimate)) %>% 
-  kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
-                full_width = F, position = "left", font_size = 14)
-```
-
-We can interpret this result as follows:
-
-1. Since the effect size associated with the variable p2 is positive, then people agreeing with the statement "I would like to participate in debates on local public issues." are more likely to be already investing in citizens initiatives than not investing, after controlling for the other variables in the model.
-
-Let's re-examine a plot that we already showed in the Exploratory Data Analysis:
-
-```{r fig.height = 4, fig.width = 10, fig.align = "center"}
-t_p2 <- prop.table(table(survey_df_c_inv$invest, survey_df_c_inv$p2), 1)
-p2_title <- "\n\nI would like to participate in debates on local public issues.\n"
-
-lik_plot(t_p2, my_df_names_c_inv, mylevels_c_inv,
-         factor_levels_c_inv, p2_title)
-```
-
-As mentionned in the Exploratory Data Analysis, observations where the investment is "0" represent about 57% of the sample. Therefore, from this plot we can visually confirm the result from the model 4.
+Again, the model did not converge. This is probably due to the fact that the number of observations for the entrepreneurs is too small overall to build any logistic regression model.

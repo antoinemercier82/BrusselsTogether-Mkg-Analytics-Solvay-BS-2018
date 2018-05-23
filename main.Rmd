@@ -1390,9 +1390,9 @@ This is a lot of output, but we are going to focus on the Coefficients table in 
 
 In order to be able to interpret anything meaningful, we first have to look at the p-values represented in the last column of the Ceofficients table ("Pr(>|z|)"). The p-value is used to test for statistical significance. We won't go into the theory of inference for regression, but simply put, low p-values (below 0.05) generally mean that we can rule out that the effect of the coefficient is due to chance. In other words, we are looking for coefficients for which the p-value is below 0.05.
 
-In the present case, all p-values are about 1, so this model is useless. In fact, the model did not converge. This is probably due to the high imbalance in the response variable. Indeed, as already mentionned, the class "Not_interested" represents only 5% of the sample or 7 out of 150 observations.
+In the present case, all p-values are about 1, so this model is useless. In fact, the model did not converge. This is probably due to the high imbalance in the response variable. Indeed, as already mentionned, the class "Not_interested" represents only 5% of the sample or 7 out of 152 observations.
 
-Therefore, we cannot infer anything regarding factors that affect the likelihood of people not to be interested in civic crowdfunding platforms as opposed to being somewhat interested ("Could be interested) or definetly interested ("Is ready").
+Therefore, we cannot infer anything regarding factors that are associated with the likelihood of people not to be interested in citizens initiatives as opposed to being somewhat interested ("Could be interested) or definetly interested ("Is ready").
 
 #### Model 2
 
@@ -2345,6 +2345,93 @@ survey_df_e %>%
                 full_width = F, position = "left", font_size = 14)
 ```
 
-# Logistic Regression Modeling
+# Logistic Regression modeling
+
+### Introduction
+
+Similar to what we did in Part I for the citizens, we are going to fit a series of multiple binary logistic regression model in order to see which predictors (in our case the independent variable questions) are associated with the likelihood of entrepreneurs to be interested in joining a civic crowdfunding platforms.
+
+Here again, our dependent variable has more than two classes (three in this case: "Not interested", "Could be interested" and "Ready to join"). Therefore, we will fit several models after having split our dependent variable classes into two groups, in several ways.
+
+### Logistic regression with Interest as the target variable
+
+#### Model 1
+
+In this section, we will fit models with Interest (in joining a civic crowdfunding platform) as the target variable and all of the dependent variables, as well as the control variables, as the explanatory variables.
+
+In the first model, we will split the Interest variable into the two following groups:
+
+* Class 0: "Not_interested";
+* Class 1: The rest of the possible classes ("Could be interested" and "Ready to join") combined.
+
+Also, we filter out observations with gender other than Female and Male. Females are then represented by the integer value 1 and Male are represented by the integer value 2.
+
+Answers to Likert scale questions range from 1 ("Strongly disagree") to 5 ("Strongly agree").
+
+Answers to the question about the age of the respondant range from 1 ("Under 14 years old") to 9 ("75 years old and plus").
+
+Answers to the education question range from 1 ("Primary_or_None") to 6 ("PhD").
+
+Finally, answers to the location and language questions have three levels:
+
+* "Brussels" = 1, "Flanders" = 2, "Wallonia" = 3;
+* "English" = 1, "Dutch" = 2, "French" = 3.
+
+The first few rows of the input to the model look like this:
+
+```{r message = FALSE, warning = FALSE}
+survey_df_e_mat <- survey_df_e %>% 
+  filter(gender %in% c("Female", "Male")) %>% 
+  mutate(interest_binary = ifelse(interest == "Not_interested", 0, 1)) %>% 
+  select(interest_binary, language, p1:edu) %>% 
+  data.matrix() %>% 
+  as_data_frame()
+
+survey_df_e_mat %>% 
+  head() %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped","hover"),
+                full_width = T, font_size = 14)
+```
+
+Let us know examine the output of the model:
+
+```{r message = FALSE, warning = FALSE}
+glm_e_1 <- glm(interest_binary ~ .,  family = "binomial", 
+                  data = survey_df_e_mat)
+
+summary(glm_e_1)
+```
+
+
+In the present case, all p-values are about 1, so this model is useless. In fact, the model did not converge. This is probably due to the high imbalance in the response variable. Indeed, as already mentionned, the class "Not_interested" represents only 5% of the sample or 1 out of 39 observations.
+
+Therefore, we cannot infer anything regarding factors that are associated with the likelihood of entrepreneurs not to be interested in joining a civic crowdfunding platform as opposed to being somewhat interested ("Could be interested) or definetly interested ("Is ready").
+
+#### Model 2
+
+In this second model, we are filtering out the observations where entrepeneurs are not interested in joining a civic crowdfunding platform, therefore we are now focusing on a subset of the data. Then we split the observations into the two following groups, related to the "interest" variable:
+
+* Class 0: "Could_be_interested";
+* Class 1: "Is_ready".
+
+The rest of the model is similar to the model 1.
+
+```{r message=FALSE, warning=FALSE}
+survey_df_e_mat <- survey_df_e %>% 
+  filter(gender %in% c("Female", "Male")) %>% 
+  filter(interest != "Not_interested") %>% 
+  mutate(interest_binary = ifelse(interest == "Is_ready", 1, 0)) %>% 
+  select(interest_binary, language, p1:edu) %>% 
+  data.matrix() %>% 
+  as_data_frame()
+
+glm_e_2 <- glm(interest_binary ~ .,  family = "binomial", 
+                  data = survey_df_e_mat)
+
+summary(glm_e_2)
+```
+
+Again, the model did not converge. This is probably due to the fact that the number of observations for the entrepreneurs is too small overall to build any logistic regression model.
 
 # Conclusions
