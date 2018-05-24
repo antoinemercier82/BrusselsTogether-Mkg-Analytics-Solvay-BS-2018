@@ -1,0 +1,61 @@
+---
+title: "Analysis of the citizen initiatives and civic crowdfunding survey for BrusselsTogether" 
+subtitle: "R code for reproducible research"
+author: "Paramio J., Piette C., Heremans S., Comté F., Mercier A."
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output:
+  html_document:
+    code_folding: hide
+    fig_height: 5
+    theme: flatly
+    toc: yes
+    toc_depth: 4
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message = FALSE, warning = FALSE, echo = FALSE, out.width = "40%"}
+# All defaults
+library(knitr)
+include_graphics("inputs/SolvayBS_logo.gif")
+```
+
+# Summary 
+
+It is now time to draw conclusions from this study.
+
+First, we should mention that it is not possible to generalize those conclusions to the population of interest, since the respondants were not sampled at random. Furthermore, the sample is biased, as evidenced by the over-representation of respondants with a masters degree.
+
+Let us remind ourselves the hypotheses that we hoped to confirm with this study.
+
+* Hypotheses related to the entrepreneurs:
+    + H1: A more participative platform is positively correlated with the interest to join a civic crowdfunding platform.
+    + H2: A positive opinion on projects that are co-created by social entrepreneurs and the local government is positively correlated with the interest to join a civic crowdfunding platform.
+* Hypotheses related to the citizens:
+    + H3: The wish for more participation in debates on public issues is positively correlated with the interest to support citizens initiatives.
+    + H4: A positive opinion on projects that are co-created by social entrepreneurs and the local government through civic crowdfunding platforms is positively correlated with the interest to support citizens initiatives.
+
+Based on the observations we have made throughout this document, we can conclude the following:
+
+1. For the entrepreneurs (active members of a local citizens initiative, social project or social organization):
+    i) Unfortunately, the 'response rate' for the entrepreneurs was not sufficient for us to be able to fit a stistical model, thus we can only rely on summary statistics and vizualisations to draw conclusions here.
+    ii) We observed that most entrepreneurs recognize in general the need for face-to-face interactions, that citizens would like to participate in debates on local public issues, and they would welcome the possibility for citizens on a crowdfunding platform to express their disagreement about some aspects of the projects they contribute to financially.
+    iii) However, we cannot use those results to validate H1 since they could not be compared with the entrepreneurs's interest to join a civic crowdfunding platform.
+    iv) We also observed that entrepreneurs generally back the idea of civic crowdfunding platform playing a role of intermediary between citizens initiatives and the local authorities. This is an interesting insight, although once again this could not be correlated with the entrepreneurs's interest to join a civic crowdfunding platform, therefore it is not possible to validate H2.
+
+2. For the citizens:
+    i) We observed that most respondants think that it is difficult for citizens to find places where local public issues are collectively debated. Moreover, they seem to have a positive opinion about civic crowdfunding platforms, since there seems to be a consensus about the fact that the latter don't represent a threat to funding of services by the government.
+    ii) They generally agree with the entrepreneurs about the role of intermediary between citizens initiatives and the local authorities that civic crowdfunding platforms could play.
+    iii) Respondants who want to participate in debates on local public issues are more likely to be willing to fund or volunteer in a citizens initiative.
+    iv) It is those who reported to be only potentially interested to fund or volunteer in a citizen initiative (as opposed to those who reported to be ready to fund or volunteer) that reported the most enthousiasm regarding the role of intermediary between citizen initiatives and local authorities that civic crowdfunding platforms could play. Perhaps would they be ready to fund or volunteer once this role is fulfilled?
+    v) Similarly, respondants only potentially interested to fund or volunteer, in particular those willing to volunteer, were more likely to report that they would be more inclined to contribute financially if they had the possibility to express their disagreement on the projects they would support. Although, once again, we cannot draw causal inferences in this study, that makes a lot of sense.
+    vi) Respondants who agree that personally funding a citizens initiative is enough to satisfy their desire to engage in this project were more likely to be willing to fund rather than to volunteer. That is not such a surprising result after all.
+    vii) Respondants who reported that they would like to participate in debates on local public issues are more likely to be already investing in citizens initiatives than not investing at all. This is quite an interesting insight, which backs our hypothesis H3.
+    
+So, overall, although we are not claiming here that all of our hypotheses are verified, there are multiple indications that a civic crowdfunding platform such as BrusselsTogether would be more attractive to both citizens and entrepreneurs should it strive for being a truly participative platform as well as a communication channel, an intermediary between the initiatives and the local authorities.
+

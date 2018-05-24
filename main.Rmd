@@ -73,7 +73,6 @@ temp_header <- read_delim("inputs/Replacement_of_csv_header.txt",
 colnames(survey_df) <- colnames(temp_header)
 
 header_lookup <- read_delim("inputs/header_lookup.txt", delim = ";")
-# names(survey_df) <- header_lookup$df_header
 ```
 
 
@@ -571,6 +570,10 @@ survey_df_j$resp_type <- factor(survey_df_j$resp_type,
 
 Now that we have imported, cleaned and tidied the data, we can start doing some exploratory analysis. In this document, we will often refer to Exploratory Data Analysis as the acronym EDA.
 
+Our sample frame (i.e. our population of interest) here is the whole population in the Brussels-Capital Region (therefore including all its 19 municipalities).
+
+Note that the respondants were given the possibility to fill the questionnaire in either English, Dutch or French.
+
 ### Control variables
 
 In the survey, we asked several questions that can be referred to as control variables, such as gender, education etc.
@@ -602,13 +605,15 @@ The corresponding table with the values is given here:
 addmargins(table(survey_df_e$language, survey_df_e$gender) %>%
              cbind(table(survey_df_c$language, survey_df_c$gender))) %>%
   kable() %>%
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = T, font_size = 14) %>%
   column_spec(8, bold = T) %>% 
   row_spec(4, bold = T) %>%
   add_header_above(c(" ", "Entrepreneur" = 3, "Citizen" = 3, " " = 1))
 
 ```
+
+As we can see, the sample size for the entrepreneurs is 39 observations, and the sample size for the citizens is 152 observations.
 
 Let's now break the count of respondants by location and education.
 
@@ -635,13 +640,15 @@ The corresponding table with the values is given here:
 addmargins(table(survey_df_e$edu, survey_df_e$loc) %>%
              cbind(table(survey_df_c$edu, survey_df_c$loc))) %>%
   kable() %>%
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = T, font_size = 14) %>%
   column_spec(8, bold = T) %>% 
   row_spec(7, bold = T) %>%
   add_header_above(c(" ", "Entrepreneur" = 3, "Citizen" = 3, " " = 1))
 
 ```
+
+We can observe that there is a disproportionate share of respondants with a masters degree among both entrepreneurs and citizens. Therefore, the samples are very likely to be biased.
 
 Finally, we can break the count of respondants by location and age:
 
@@ -668,7 +675,7 @@ The corresponding table with the values is given here:
 addmargins(table(survey_df_e$age, survey_df_e$loc) %>%
              cbind(table(survey_df_c$age, survey_df_c$loc))) %>%
   kable() %>%
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = T, font_size = 14) %>%
   column_spec(8, bold = T) %>% 
   row_spec(10, bold = T) %>%
@@ -683,14 +690,14 @@ Concerning the citizens, the objective of this survey is to test two hypotheses 
 1. H3: The wish for more participation in debates on public issues is positively correlated with the interest to support citizens initiatives.
 2. H4: A positive opinion on projects that are co-created by social entrepreneurs and the local government through civic crowdfunding platforms is positively correlated with the interest to support citizens initiatives.
 
-The interest to support citizens initiatives is our dependent variable (this is the outcome that BrusselsTogether would like to better understand) and is measured by the question shown in the table below. Also shown in this table is the related variable name in the R code.
+The interest to support citizens initiatives is our dependent variable (this is the outcome that BrusselsTogether would like to better understand) and is measured by the question shown in the table below. Also shown in this table is the related categories in the R code.
 
 ```{r}
 x <- list(q = names(lut_c_int_eng)[c(1, 3, 2, 5, 4)], v = levels(survey_df_c$interest)) %>% as_data_frame()
-colnames(x) <- c(header_lookup$google_f_header[16], "variable_name")
+colnames(x) <- c(header_lookup$google_f_header[16], "Category in R code")
 x %>% 
   kable() %>%
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = F, position = "left", font_size = 14)
 ```
 
@@ -723,19 +730,19 @@ survey_df_c %>%
   select(interest, n, percent) %>% 
   arrange(desc(n)) %>% 
   kable() %>%
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = F, position = "left", font_size = 14)
 ```
 
 The independent variables (the wish for more participation in debates on public issues for H3 and the opinion on projects that are co-created by social entrepreneurs and the local government through civic crowdfunding platforms for H4) are what we think could be associated with the dependent variable (although we could not make causal inference from an observational study like this one). If the correlations are verified, then we could provide BrusselsTogether with actionnable recommendations, such as making the platform more participative or playing a role of intermediary between citizens initiatives and the local authorities.
 
-For each of the two independent variables, we asked a set of questions which, in our opinion, should reflect their corresponding independent variable. In this case, we could say that the independent variables are latent variables that are each measured by a set of several items. We will dig more into the idea of latent variables in the chapter "Confirmatory Factor Analysis".
+For each of the two independent variables, we asked a set of questions which, in our opinion, should reflect their corresponding independent variable. In this case, we could say that the independent variables are latent variables that are each measured by a set of several items. We will dig more into the idea of latent variables in the chapter **Confirmatory Factor Analysis**.
 
 The table below displays the items and their related variable name in the R code. The items related to the need for more participation in debates on public issues are `p1` to `p5` and the items related to opinion on projects that are co-created by social entrepreneurs and the local government through civic crowdfunding platforms are `g1` to `g6`.
 
 Additionnaly, we asked the respondants whether their interest in contributing to the future of their neighborhood had increased in the past several years (variable name `neighb`).
 
-All of those items were measured on a 5-points Likert scale, from `Strongly_disagree` to `strongly_agree`.
+All of those items were measured on a 5-points Likert scale, from `Strongly_disagree` to `Strongly_agree`.
 
 ```{r}
 meta <- data_frame(question = header_lookup$google_f_header[c(17:27, 29)],
@@ -743,7 +750,7 @@ meta <- data_frame(question = header_lookup$google_f_header[c(17:27, 29)],
 
 meta %>% 
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = T, font_size = 14)
 ```
 
@@ -869,6 +876,8 @@ c_p_title <- "\n\nCitizens - Participative questions\n"
 lik_plot(t_c_p, my_df_names_c_p, mylevels_c_p, factor_levels_c_p, c_p_title)
 ```
 
+We can observe from this plot that the responses to some of the questions are polarized. Overall, it seems that most of the respondants disagree with the statement: **It is relatively easy for citizens to find places where local public issues are collectively debated**.
+
 ```{r fig.height = 5.5, fig.width = 10, fig.align = "center"}
 my_df_names_c_g <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
                  "Agree", "Strongly agree")
@@ -895,6 +904,11 @@ c_g_title <- "Citizens - Government questions\n"
 
 lik_plot(t_c_g, my_df_names_c_g, mylevels_c_g, factor_levels_c_g, c_g_title)
 ```
+
+Here again, we can observe from this plot that the responses to some of the questions are quite polarized:
+
+* Overall, it seems that most of the respondants disagree with the statement: **Civic crowdfunding represents a direct threat to public funding of services**;
+* Quite interestingly for the purposes of our research, it seems that most of the respondants agree with the statement: **Civic crowdfunding platforms could play a role of intermediary between citizen's initiatives and the local government**.
 
 ```{r fig.height = 2.7, fig.width = 10, fig.align = "center"}
 questions_neighb <- header_lookup$google_f_header[29]
@@ -929,15 +943,15 @@ Finally, we asked how much the respondants were already investing in citizens in
 
 Note that this feature was added a bit later after having launched the online survey, so the first few observations do not contain information for this question.
 
-This question, along with its corresponding choices and R variable names, is shown in the table below.
+This question, along with its corresponding choices and categories in the R code, is shown in the table below.
 
 ```{r}
 x <- list(q = names(lut_c_invest_eng),
      v = levels(survey_df_c$invest)[2:6]) %>% as_data_frame()
-colnames(x) <- c(header_lookup$google_f_header[28], "variable_name")
+colnames(x) <- c(header_lookup$google_f_header[28], "Category in R code")
 x %>% 
   kable() %>%
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = F, position = "left", font_size = 14)
 ```
 
@@ -972,19 +986,21 @@ survey_df_c %>%
   select(invest, n, percent) %>% 
   arrange(desc(n)) %>% 
   kable() %>%
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = F, position = "left", font_size = 14)
 ```
 
-Note that the respondants were given the possibility to fill the whole questionnaire in either English, Dutch or French.
-
 ###  Distribution of answers for independent variables broken down by interest
 
-We can break down the distribution of answers related to the independent variables by interest in citizens initiatives.
+In order to have a rough sense of the relationship between, on the one hand, the answers to the indenpendent variables questions and the control variable questions, and on the other hand, the answers to the dependent variables questions, in the next few sections we are going to break down the previous vizualisations by category of answer to the dependent variables questions.
 
-While examining the plots below, we should keep in mind that, as shown previously by the distribution of the interest, the proportion of people "ready to fund" and "not interested" is only 9% and 5% of the sample, respectively.
+Note that we will not comment these plots here, as we will attempt to quantify these relationships later in the chapter **Logistic Regression Modeling**.
 
-Here below is a series of plots related to the "participative" questions.
+First, let us break down the distribution of answers related to the independent variables by interest in citizens initiatives.
+
+While examining the plots below, we should keep in mind that, as shown previously by the distribution of the interest, the proportion of people 'ready to fund' and 'not interested' is only 9% and 5% of the sample, respectively.
+
+Here below is a series of plots related to the 'participative' questions.
 
 ```{r fig.height = 4, fig.width = 10, fig.align = "center"}
 my_df_names <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
@@ -1031,7 +1047,7 @@ p5_title <- "\n\nFace-to-face interactions are necessary for collective action.\
 lik_plot(t_p5, my_df_names, mylevels, factor_levels, p5_title)
 ```
 
-Here below is a series of plots related to the "government" questions.
+Here below is a series of plots related to the 'government' questions.
 
 ```{r fig.height = 4, fig.width = 10, fig.align = "center"}
 my_df_names <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
@@ -1085,7 +1101,7 @@ g6_title <- "General interest issues are addressed more efficiently\nby crowdfun
 lik_plot(t_g6, my_df_names, mylevels, factor_levels, g6_title)
 ```
 
-Here below is the plot related to the "interest in the future of my neighborhood" question.
+Here below is the plot related to the 'interest in the future of my neighborhood' question.
 
 ```{r fig.height = 4, fig.width = 10, fig.align = "center"}
 t_neighb <- prop.table(table(survey_df_c$interest, survey_df_c$neighb), 1)
@@ -1096,9 +1112,9 @@ lik_plot(t_neighb, my_df_names, mylevels, factor_levels, neighb_title)
 
 ###  Distribution of answers for independent variables broken down by past investment
 
-Just like in the section above, while examining the following plots, we should keep in mind that, as shown previously by the distribution of "past investment", the proportions are highly imbalanced, since people investing "100_199", "200_499" and "500_plus" represent only 5%, 1% and 4% of the sample, respectively.
+Just like in the section above, while examining the following plots, we should keep in mind that, as shown previously by the distribution of 'past investment', the proportions are highly imbalanced, since people investing `100_199`, `200_499` and `500_plus` represent only 5%, 1% and 4% of the sample, respectively.
 
-Here below is a series of plots related to the "participative" questions.
+Here below is a series of plots related to the 'participative' questions.
 
 ```{r fig.height = 4, fig.width = 10, fig.align = "center"}
 my_df_names_c_inv <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
@@ -1153,7 +1169,7 @@ lik_plot(t_p1, my_df_names_c_inv, mylevels_c_inv,
          factor_levels_c_inv, p1_title)
 ```
 
-Here below is a series of plots related to the "government" questions.
+Here below is a series of plots related to the 'government' questions.
 
 ```{r fig.height = 4, fig.width = 10, fig.align = "center"}
 t_g1 <- prop.table(table(survey_df_c_inv$invest, survey_df_c_inv$g1), 1)
@@ -1203,7 +1219,7 @@ lik_plot(t_g6, my_df_names_c_inv, mylevels_c_inv,
          factor_levels_c_inv, g6_title)
 ```
 
-Here below is the plot related to the "interest in the future of my neighborhood" question.
+Here below is the plot related to the 'interest in the future of my neighborhood' question.
 
 ```{r fig.height = 4, fig.width = 10, fig.align = "center"}
 t_neighb <- prop.table(table(survey_df_c_inv$invest, survey_df_c_inv$neighb), 1)
@@ -1215,7 +1231,7 @@ lik_plot(t_neighb, my_df_names_c_inv, mylevels_c_inv,
 
 ###  Distribution of answers for independent variables broken down by education
 
-Here below is a plot showing the education vs answers to independent variables questions, broken down by independent variables questions.
+Here below is a plot showing the education versus answers to the independent variables questions, broken down by the independent variables questions.
 
 ```{r fig.height = 7, fig.width = 10, fig.align = "center"}
 survey_df_c <- survey_df_c %>% 
@@ -1248,7 +1264,7 @@ tidy_survey_df_c %>%
   )
 ```
 
-For this plot, the education is coded as an integer value as shown in the following table (see the column "edu_num"). This table also shows the count for each level (under the column "n").
+For this plot, the education is coded as an integer value as shown in the following table (see the column `edu_num`). This table also shows the count for each level (under the column `n`).
 
 ```{r}
 options(scipen = 999, digits = 3)
@@ -1256,7 +1272,7 @@ options(scipen = 999, digits = 3)
 survey_df_c %>% 
   count(edu, edu_num) %>%
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = F, position = "left", font_size = 14)
 ```
 
@@ -1268,15 +1284,15 @@ meta <- data_frame(question = header_lookup$google_f_header[c(17:27, 29)],
 
 meta %>% 
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = T, font_size = 14)
 ```
 
-We can observe from this plot that there is a possible positive relationship between education and the extent to which respondants agreed with the statement "Personally funding a citizen’s initiative is enough to satisfy my desire to engage in this project.", although this should be confirmed with the statistical modeling that we will perform in the next chapter.
+We can observe from this plot that there is a possible positive relationship between education and the extent to which respondants agreed with the statement: **Personally funding a citizen’s initiative is enough to satisfy my desire to engage in this project**, although this should be confirmed/quantified by the statistical modeling that we will perform in the next chapter.
 
 ###  Distribution of answers for independent variables broken down by age
 
-Here below is a plot showing the mean age vs answers to independent variables questions, broken down by independent variables questions.
+Here below is a plot showing the mean age versus answers to the independent variables questions, broken down by the independent variables questions.
 
 ```{r fig.height = 7, fig.width = 10, fig.align = "center"}
 survey_df_c <- survey_df_c %>% 
@@ -1313,7 +1329,7 @@ facet_wrap(~factor(key, ordered = T,
   theme(plot.margin = unit(c(1,1,1,0), "cm"))
 ```
 
-For this plot, the age is coded as an integer value as shown in the following table (see the column "age_num"). This table also shows the count for each level (under the column "n").
+For this plot, the age group is coded as an integer value as shown in the following table (see the column `age_num`). This table also shows the count for each level (under the column `n`).
 
 ```{r}
 options(scipen = 999, digits = 3)
@@ -1321,32 +1337,32 @@ options(scipen = 999, digits = 3)
 survey_df_c %>% 
   count(age, age_num) %>%
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = F, position = "left", font_size = 14)
 ```
 
-Similar to the previous plot, we can observe from this plot that there is a possible positive relationship between age and the extent to which the participant agreed with the statement "Personally funding a citizen’s initiative is enough to satisfy my desire to engage in this project.", although this should be confirmed with the statistical modeling that we will perform in the next chapter.
+Similar to the previous plot, we can observe from this plot that there is a possible positive relationship between age and the extent to which the participant agreed with the statement: **Personally funding a citizen’s initiative is enough to satisfy my desire to engage in this project**, although this should be confirmed/quantified with the statistical modeling that we will perform in the next chapter.
 
 # Logistic Regression modeling
 
 ### Introduction
 
-  In this chapter, we are going to fit a series of multiple binary logistic regression models (which are the most basic model used to predict a categorical response, such as our two dependent variables "interest" and "past investment"). This is useful because these models will allow us to see which predictors (in our case the independent variables and control variables) are associated with the likelihood of people to be interested in supporting citizens initiatives.
+In this chapter, we are going to fit a series of multiple binary logistic regression models (which are the most basic model used to predict a categorical response, such as our two dependent variables 'interest' and 'past investment'). This is useful because these models will allow us to see which predictors (in our case the independent variables and control variables) are associated with the likelihood of people to be interested in supporting citizens initiatives.
 
-This kind of models can only predict a target variable which has no more than two classes, thus the term binary. However, our dependent variables have more than two classes (for example, there are five classes for the "interest" variable, from "Not interested" up to "Ready to fund"). Therefore, we will fit several models after having split our dependent variable classes into two groups, in several ways. This is called the "one versus rest" approach. There are of course more complex models that can handle more than two classes in the target variable, but we will keep things simple here.
+This kind of models can only predict a target variable which has two classes, thus the term binary. However, our dependent variables have more than two classes (for example, there are five classes for the 'interest' variable, from 'Not interested' up to 'Ready to fund'). Therefore, we will fit several models one after the other after having split our dependent variable classes into two groups in several ways. This is called the 'one versus rest' approach. There are of course more complex models that can handle more than two classes in the target variable, but we will keep things simple here.
 
-Note that designing a survey with ordinal categorical variables such as questions with choices on a 5-point Likert scale or age or education makes it easier to interpret the results of the models, as we will see next.
+Note that designing a survey with ordinal categorical variables (i.e. categorical variables which have a natural order) such as questions with choices on a 5-point Likert scale or age or education makes it easier to interpret the results of the models, as we will see next.
 
 ### Logistic regression with Interest as the target variable
 
 #### Model 1
 
-In this section, we will fit a model with Interest (in supporting citizens initiatives) as the target variable and all of the independent variables, as well as the control variables, as the explanatory variables.
+In this section, we will fit a model with 'Interest' (in supporting citizens initiatives) as the target variable and all of the independent variables, as well as the control variables, as the explanatory variables.
 
 In this model, we will split the Interest variable into the two following groups:
 
 * Class 0: `Not_interested`;
-* Class 1: The rest of the possible classes (`Could_be_interested_Vol`, `Could_be_interested_Fund`, `Is_ready_Vol` and `Is_ready_Fund`) combined.
+* Class 1: The rest of the possible classes combined (`Could_be_interested_Vol`, `Could_be_interested_Fund`, `Is_ready_Vol` and `Is_ready_Fund`).
 
 Also, we filter out observations with gender other than `Female` and `Male`. Then, `Female` are represented by the integer value 1 and Male are represented by the integer value 2 (there is no particular reason for this, we could do it the other way around).
 
@@ -1376,7 +1392,7 @@ survey_df_c_mat <- survey_df_c %>%
 survey_df_c_mat %>% 
   head() %>% 
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = T, font_size = 14)
 ```
 
@@ -1389,18 +1405,17 @@ glm1 <- glm(interest_binary ~ .,  family = "binomial",
 summary(glm1)
 ```
 
-
 This is a lot of output, but we are going to focus on the Coefficients table in the middle.
 
 In order to be able to interpret anything meaningful, we first have to look at the p-values represented in the last column of the Ceofficients table (`Pr(>|z|)`). The p-value is used to test for statistical significance. We won't go into the theory of inference for regression, but simply put, low p-values (below 0.05) generally mean that we can rule out that the effect of the coefficient is due to chance. In other words, we are looking for coefficients for which the p-value is below 0.05.
 
 In the present case, all p-values are about 1, so this model is useless. In fact, the model did not converge. This is probably due to the high imbalance in the target variable. Indeed, as already mentionned, the class `Not_interested` represents only 5% of the sample or 7 out of 152 observations.
 
-Therefore, we cannot infer anything regarding factors that could be associated with the likelihood of people not to be interested in citizens initiatives as opposed to being somewhat interested ("Could be interested") or definetly interested ("Is ready").
+Therefore, we cannot infer anything regarding factors that could be associated with the likelihood of people not to be interested in citizens initiatives as opposed to being somewhat interested ('Could be interested') or definetly interested ('Is ready').
 
 #### Model 2
 
-In this second model, we are filtering out the observations where people are not interested in joining a civic crowdfunding platform, therefore we are now focusing on a subset of the data. Then we split the observations into the two following groups, related to the `interest` variable:
+In this second model, we are filtering out the observations where people are not interested in citizens initiatives, therefore we are now focusing on a subset of the data. Then we split the observations into the following two groups, related to the `interest` variable:
 
 * Class 0: `Could_be_interested_Vol` and `Could_be_interested_Fund`;
 * Class 1: `Is_ready_Vol` and `Is_ready_Fund`.
@@ -1435,13 +1450,13 @@ glm2 %>%
   filter(p.value < 0.05) %>%
   arrange(desc(estimate)) %>% 
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = F, position = "left", font_size = 14)
 ```
 
 We can interpret this table as follows:
 
-1. Since the effect size (i.e. the estimate of the coefficient) associated with the variable `p2` is above zero, then people agreeing with the statement "I would like to participate in debates on local public issues." are more likely to be "ready" to fund or volunteer (they are more likely to have answered "I am ready to..." rather than "I could be interested to..."), after controlling for the other variables in the model.
+1. Since the effect size (i.e. the estimate of the coefficient) associated with the variable `p2` is above zero, then people agreeing with the statement: **I would like to participate in debates on local public issues** are more likely to be 'ready' to fund or volunteer (they are more likely to have answered 'I am ready to...' rather than 'I could be interested to...'), *after controlling for the other variables in the model*.
 
 Let's have a look at a plot similar to what we did in the Exploratory Data Analysis (EDA), but without the category `Not_interested`:
 
@@ -1454,7 +1469,7 @@ lik_plot(t_p2, my_df_names, mylevels, factor_levels, p2_title)
 
 This confirms visually the positive relationship identified in point 1.
 
-2. Similarly, since the effect size associated with the variable `neighb` is positive, then people agreeing with the statement "My interest in contributing to the future of my neighborhood has increased in the past several years." are more likely to be "ready" to fund or volunteer, after controlling for the other variables in the model.
+2. Similarly, since the effect size associated with the variable `neighb` is positive, then people agreeing with the statement: **My interest in contributing to the future of my neighborhood has increased in the past several years** are more likely to be 'ready' to fund or volunteer, *after controlling for the other variables in the model*.
 
 Let's have a look at a plot similar to what we did in the EDA, but without the category `Not_interested`:
 
@@ -1467,7 +1482,7 @@ lik_plot(t_neighb, my_df_names, mylevels, factor_levels, neighb_title)
 
 This confirms visually the positive relationship identified in point 2.
 
-3. Since the effect size associated with the variable `age` is above zero, then older people are more likely to be "ready" to fund or volunteer, after controlling for the other variables in the model.
+3. Since the effect size associated with the variable `age` is above zero, then older people are more likely to be 'ready' to fund or volunteer, *after controlling for the other variables in the model*.
 
 Let's have a look at a bar chart representing the proportions of interest conditionned on the age group:
 
@@ -1490,7 +1505,7 @@ survey_df_c %>%
 
 This plot seems to confirm the positive relationship identified in point 3.
 
-4. Since the effect size associated with the variable `g4` is negative, then people agreeing with the statement "Civic crowdfunding platforms could play a role of intermediary between citizen’s initiatives and the local government." are less likely to be "ready" to fund or volunteer (they are more likely to have answered "I could be interested to..."), after controlling for the other variables in the model.
+4. Since the effect size associated with the variable `g4` is negative, then people agreeing with the statement: **Civic crowdfunding platforms could play a role of intermediary between citizen’s initiatives and the local government** are less likely to be 'ready' to fund or volunteer (they are more likely to have answered 'I could be interested to...'), *after controlling for the other variables in the model*.
 
 Let's have a look at a plot similar to what we did in the EDA, but without the category `Not_interested`:
 
@@ -1503,7 +1518,7 @@ lik_plot(t_g4, my_df_names, mylevels, factor_levels, g4_title)
 
 This confirms visually the negative relationship identified in point 4.
 
-5. Finally, since the effect size associated with the variable `p4` is negative, then people agreeing with the statement "I would be more inclined to contribute financially to a project on a civic crowdfunding platform if I had the possibility to express my disagreement about some aspects of the project." are less likely to be "ready" to fund or volunteer (they are more likely to have answered "I could be interested to..."), after controlling for the other variables in the model.
+5. Finally, since the effect size associated with the variable `p4` is negative, then people agreeing with the statement: **I would be more inclined to contribute financially to a project on a civic crowdfunding platform if I had the possibility to express my disagreement about some aspects of the project** are less likely to be 'ready' to fund or volunteer (they are more likely to have answered 'I could be interested to...'), *after controlling for the other variables in the model*.
 
 Let's try to confirm this visually:
 
@@ -1518,7 +1533,7 @@ The negative relationship identified in this last point is less clear in this pl
 
 #### Model 3
 
-Let's build a third model in which we are filtering out the observations where people are not interested in joining a civic crowdfunding platform, and where we split the observations into the two following groups, related to the `interest` variable:
+Let's build a third model in which we are filtering out the observations where people are not interested in citizens initiatives, and where we split the observations into the two following groups, related to the `interest` variable:
 
 * Class 0: `Could_be_interested_Vol` and `Is_ready_Vol`;
 * Class 1: `Could_be_interested_Fund` and `Is_ready_Fund`.
@@ -1555,13 +1570,13 @@ glm3 %>%
   filter(p.value < 0.05) %>%
   arrange(desc(estimate)) %>% 
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = F, position = "left", font_size = 14)
 ```
 
 We can interpret this table as follows:
 
-1. Since the effect size associated with the variable `p4` is positive, then people agreeing with the statement "I would be more inclined to contribute financially to a project on a civic crowdfunding platform if I had the possibility to express my disagreement about some aspects of the project." are more likely to be willing to fund rather than to volunteer, after controlling for the other variables in the model.
+1. Since the effect size associated with the variable `p4` is positive, then people agreeing with the statement: **I would be more inclined to contribute financially to a project on a civic crowdfunding platform if I had the possibility to express my disagreement about some aspects of the project** are more likely to be willing to fund rather than to volunteer, *after controlling for the other variables in the model*.
 
 Let's have a look at a plot similar to what we did in the EDA, but without the category `Not_interested` and with the class labels for the dependent variable re-ordered (on the y axis):
 
@@ -1573,9 +1588,9 @@ factor_levels_m3 <- c("Could_be_interested_Vol", "Is_ready_Vol", "Could_be_inter
 lik_plot(t_p4, my_df_names, mylevels, factor_levels_m3, p4_title)
 ```
 
-This confirms visually the positive relationship identified in point 1, and it seems to make more sense than for point 5 when interpreting the model 2.
+This confirms visually the positive relationship identified in point 1, and it seems to make more sense, visually, than the relationship identified in point 5 when interpreting the model 2.
 
-2. Similarly, since the effect size associated with the variable `p1` is positive, then people agreeing with the statement "Personally funding a citizen’s initiative is enough to satisfy my desire to engage in this project." are more likely to be willing to fund rather than to volunteer, after controlling for the other variables in the model.
+2. Similarly, since the effect size associated with the variable `p1` is positive, then people agreeing with the statement: **Personally funding a citizen’s initiative is enough to satisfy my desire to engage in this project** are more likely to be willing to fund rather than to volunteer, *after controlling for the other variables in the model*.
 
 Let's have a look at a plot similar to what we did in the EDA, but without the category `Not_interested` and with the class labels for the dependent variable re-ordered:
 
@@ -1593,7 +1608,7 @@ This confirms visually the positive relationship identified in point 2.
 
 #### Model 4
 
-In our last model, we are going to change our target variable. Instead of modeling the interest in citizens initiatives explained by all of the other variables, we will be modeling the respondants past investment in citizens initiatives explained by all of the other variables (independent variables and control variables).
+In our last model, we are going to change our target variable. Instead of modeling the interest in citizens initiatives explained by all of the other variables, we will be modeling the respondants' past investment in citizens initiatives explained by all of the other variables (independent variables and control variables).
 
 In order for this target to be binary, we will split the observations into the two following groups, related to the `invest` variable:
 
@@ -1627,13 +1642,13 @@ glm4 %>%
   filter(p.value < 0.05) %>%
   arrange(desc(estimate)) %>% 
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = F, position = "left", font_size = 14)
 ```
 
 We can interpret this result as follows:
 
-1. Since the effect size associated with the variable `p2` is positive, then people agreeing with the statement "I would like to participate in debates on local public issues." are more likely to be already investing in citizens initiatives than not investing, after controlling for the other variables in the model.
+1. Since the effect size associated with the variable `p2` is positive, then people agreeing with the statement: **I would like to participate in debates on local public issues** are more likely to be already investing in citizens initiatives than not investing, *after controlling for the other variables in the model*.
 
 Let's re-examine a plot that we already showed in the Exploratory Data Analysis:
 
@@ -1657,13 +1672,13 @@ This chapter is optionnal for the reader, because we are not confident that our 
 
 By design, there are questions that are intended to collectively measure one latent variable. For example, there are five questions related to the wish from the citizens for more participation in debates on public issues. Also, there are six questions related to whether a civic crowdfunding platform could be regarded as an intermediary between the citizens initiatives and the local authorities.
 
-Confirmatory Factor Analysis (CFA) allows us to reduce the dimensionality of several items into their corresponding latent variable. The resulting latent variable is a continuous numeric variable that captures the variability of its corresponding items.
+Confirmatory Factor Analysis (CFA) allows us to reduce the dimensionality of several items into their corresponding hypothesized latent variable. The resulting latent variable is a continuous numeric variable that captures the variability of its corresponding items.
 
 Let's try it out.
 
 ### Preprocessing
 
-Here below are the questions related to the two latent variables (p for participative and g for relationship between citizens initiatives and the government):
+As a reminder, here below are the questions related to the two latent variables (p for participative and g for relationship between citizens initiatives and the government):
 
 ```{r}
 meta <- data_frame(question = header_lookup$google_f_header[17:27],
@@ -1671,7 +1686,7 @@ meta <- data_frame(question = header_lookup$google_f_header[17:27],
 
 meta %>% 
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = T, font_size = 14)
 ```
 
@@ -1688,11 +1703,11 @@ survey_df_c_mat %>%
   select(interest:neighb, age, edu, loc, gender) %>% 
   head(n = 10) %>% 
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = T, font_size = 14)
 ```
 
-Note that the following variables were not displayed in this table (because they didn't fit into the webpage): `language` and `grouping`.
+Note that the following variables were not displayed in this table because they didn't fit into the webpage: `language` and `grouping`.
 
 ### Modeling
 
@@ -1729,7 +1744,7 @@ sfit1 <- standardizedsolution(fit1)
 sfit1 %>% 
   filter(op == "=~") %>% 
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = T, font_size = 14)
 ```
 
@@ -1741,20 +1756,20 @@ fit_1 <- fitmeasures(fit1, c("npar", "chisq", "df", "cfi", "rmsea", "srmr"))
 cbind(read.table(text = names(fit_1)), fit_1) %>% 
   select(fit_1) %>% 
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = F, position = "left", font_size = 14)
 ```
 
 #### Model improvement
 
-Modification indices can be requested in order to determine if changes should be made to the model such as adding error covariance terms or removing poor performing items. Here, we sorted the output by `mi` in decreasing order.
+Modification indices can be requested in order to determine if changes should be made to the model such as adding error covariance terms or removing poor performing items, in order to improve the model. Here, we sorted the output by `mi` in decreasing order.
 
 ```{r}
 modificationindices(fit1) %>% 
   arrange(desc(mi)) %>% 
   head(10) %>% 
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = T, font_size = 14)
 ```
 
@@ -1778,13 +1793,13 @@ fits <- list(fit_1 = fit1, fit_2 = fit2)
 round(sapply(fits, function(X)
   fitmeasures(X, c("npar", "chisq", "df", "cfi", "rmsea", "srmr"))), 3) %>%
   kable() %>%
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = F, position = "left", font_size = 14)
 ```
 
 As we can see, the $\chi^2$ has improved by 12, the comparative fit index (cfi) has increased by 0.12, the root mean square error of approximation (rmsea) has improved by 0.019 and the standardized root mean square residual (srmr) has improved by 0.008.
 
-Instead of qualitatively assess this improvement, we can perform a significance test to compare the two models.
+Instead of qualitatively assessing this improvement, we can perform a significance test to compare the two models.
 
 ```{r}
 anova(fit1, fit2)
@@ -1792,7 +1807,7 @@ anova(fit1, fit2)
 
 As evidenced by the p-value that is below 0.05, it seems that adding the covariance term significantly improved the model. We will then consider this latter model for the rest of this analysis.
 
-We can now save the latent variables and add them to our dataset. In the following two tables we show, for the first six observations, the items `p1` to `p5` and their latent variable, as well as the items `g1` to `g6` and their own latent variable.
+We can now save the latent variables and add them to our dataset. In the following two tables we show, for the first six observations, the items `p1` to `p5` along with their corresponding latent variable, as well as the items `g1` to `g6` along with their own latent variable.
 
 ```{r}
 pfit2 <- data.frame(predict(fit2))
@@ -1807,14 +1822,14 @@ survey_df_c %>%
   select(p1:p5, partcip_will) %>% 
   head() %>% 
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = T, font_size = 14)
 
 survey_df_c %>% 
   select(g1:g6, civic_crowd_gov) %>% 
   head() %>% 
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = T, font_size = 14)
 ```
 
@@ -1824,7 +1839,7 @@ survey_df_c %>%
 
 Let's see now if we can better assess the relationship between our independent variables (`partcip_will` and `civic_crowd_gov`) and our dependent variable, which is the degree of interest from citizens in citizens initiatives.
 
-Our independent variables are now reduced to a continuous numeric value, thus we can use boxplots to explore the relationships.
+Our independent variables are now reduced to a continuous numeric value, thus we can use boxplots to explore the relationships visually.
 
 ```{r fig.height = 5, fig.width = 10, fig.align = "center"}
 survey_df_c %>% 
@@ -1861,11 +1876,13 @@ From these two plots, we can qualitatively assess that:
 * negative values of both independent variables could be associated with not being interested in citizens initiatives;
 * there does not seem to be a significant difference between the other categories of interest: they are all associated with values of the latent variables centered at or above zero.
 
-#### Binary logistic regression model
+Again, we are not claiming here that these results are correct and we will not include them in our conclusions. We will refine this part of the document further in the next following months.
 
 # Part II - Entrepreneurs
 
 # Exploratory Data Analysis
+
+Our sample frame here is all active members (whom we simply call 'entrepreneurs' in this document) of a local citizens initiative, social project or social organization in the Brussels-Capital Region.
 
 ### Control variables
 
@@ -1878,14 +1895,14 @@ Concerning the entrepeneurs (active members of a local citizens initiative, soci
 1. H1: A more participative platform is positively correlated with the interest to join a civic crowdfunding platform.
 2. H2: A positive opinion on projects that are co-created by social entrepreneurs and the local government is positively correlated with the interest to join a civic crowdfunding platform.
 
-The interest to join a civic crowdfunding platform is thus our dependent variable (this is the outcome that BrusselsTogether would like to better understand) and is measured by the question shown in the table below. Also shown in this table is the related variable name in the R code.
+The interest to join a civic crowdfunding platform is thus our dependent variable (this is the outcome that BrusselsTogether would like to better understand) and is measured by the question shown in the table below. Also shown in this table is the related categories in the R code.
 
 ```{r}
 x <- list(q = names(lut_e_int_eng), v = levels(survey_df_e$interest)) %>% as_data_frame()
-colnames(x) <- c(header_lookup$google_f_header[4], "variable_name")
+colnames(x) <- c(header_lookup$google_f_header[4], "Category in R code")
 x %>%
   kable() %>%
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = F, position = "left", font_size = 14)
 ```
 
@@ -1918,7 +1935,7 @@ survey_df_e %>%
   select(interest, n, percent) %>% 
   arrange(desc(n)) %>% 
   kable() %>%
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = F, position = "left", font_size = 14)
 ```
 
@@ -1938,7 +1955,7 @@ meta <- data_frame(question = header_lookup$google_f_header[c(5:15, 29)],
 
 meta %>% 
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = T, font_size = 14)
 ```
 
@@ -1976,6 +1993,13 @@ e_p_title <- "\n\nEntrepreneurs - Participative questions\n"
 lik_plot(t_e_p, my_df_names_e_p, mylevels_e_p, factor_levels_e_p, e_p_title)
 ```
 
+We can observe from this plot that the responses to most questions are polarized. In particular:
+
+* It seems that most of the respondants agree with the statement: **Face-to-face interactions are necessary for collective action.**
+* It seems that most of the respondants agree with the statement: **Citizens would like to participate in debates on local public issues that they care about.**
+* It seems that most of the respondants disagree with the statement: **It is relatively easy for citizens to find places where local public issues are collectively debated.**
+* It seems that most of the respondants agree with the statement: **I would welcome the possibility for citizens on a crowdfunding platform to express their disagreement about some aspects of the projects they contribute to financially.**
+
 ```{r fig.height = 5.5, fig.width = 10, fig.align = "center"}
 my_df_names_e_g <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
                  "Agree", "Strongly agree")
@@ -2002,6 +2026,11 @@ e_g_title <- "Entrepreneurs - Government questions\n"
 
 lik_plot(t_e_g, my_df_names_e_g, mylevels_e_g, factor_levels_e_g, e_g_title)
 ```
+
+Once again, we can observe from this plot that the responses to some questions are polarized. In particular:
+
+* It seems that most of the respondants disagree with the statement: **Civic crowdfunding represents a direct threat to the funding of public goods and services by the local government.**
+* Quite interestingly for the validation of the hypothese H2, it seems that most of the respondants agree with the statement: **Civic crowdfunding platforms could play a role of intermediary between citizen’s initiatives and the local government.**
 
 ```{r fig.height = 2.7, fig.width = 10, fig.align = "center"}
 questions_neighb <- header_lookup$google_f_header[29]
@@ -2031,13 +2060,17 @@ e_neighb_title <- "Entrepreneurs - Interest in future of neighb. question\n"
 lik_plot(t_e_neighb, my_df_names_e_neighb, mylevels_e_neighb, factor_levels_e_neighb, e_neighb_title)
 ```
 
+The response to this question is polarized once again, as entrepreneur seem to generally agree with the statement: **My interest in contributing to the future of my neighborhood has increased in the past several years.**
+
 ###  Distribution of answers for independent variables broken down by interest
 
-We can break down the distribution of answers related to the independent variables by interest in joining a civic crowdfunding platform.
+In order to have a rough sense of the relationship between, on the one hand, the answers to the indenpendent variables questions and the control variable questions, and on the other hand, the answers to the dependent variable question, in this section we are going to break down the previous vizualisations by category of answer to the dependent variable question. We will try to confirm those relationships quantitatively later on, in the chapter **Logistic Regression Modeling**.
 
-As for the analysis of the citizens responses, we should keep in mind that people "ready to join" and "not interested" represent only a fraction of the sample.
+Let us then break down the distribution of answers related to the independent variables by interest in joining a civic crowdfunding platform.
 
-Here below is a series of plots related to the "participative" questions.
+As for the analysis of the citizens responses, we should keep in mind that people 'ready to join' and 'not interested' represent only a fraction of the sample.
+
+Here below is a series of plots related to the 'participative' questions.
 
 ```{r fig.height = 4, fig.width = 10, fig.align = "center"}
 my_df_names <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
@@ -2082,7 +2115,7 @@ p5_title <- "\n\nI would welcome the possibility for citizens on a crowdfunding 
 lik_plot(t_p5, my_df_names, mylevels, factor_levels, p5_title)
 ```
 
-Here below is a series of plots related to the "government" questions.
+Here below is a series of plots related to the 'government' questions.
 
 ```{r fig.height = 4, fig.width = 10, fig.align = "center"}
 my_df_names <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
@@ -2134,7 +2167,7 @@ g6_title <- "\n\nGeneral interest issues are addressed more efficiently by\ncrow
 lik_plot(t_g6, my_df_names, mylevels, factor_levels, g6_title)
 ```
 
-Here below is the plot related to the "interest in the future of my neighborhood" question.
+Here below is the plot related to the 'interest in the future of my neighborhood' question.
 
 ```{r fig.height = 4, fig.width = 10, fig.align = "center"}
 t_neighb <- prop.table(table(survey_df_e$interest, survey_df_e$neighb), 1)
@@ -2145,7 +2178,7 @@ lik_plot(t_neighb, my_df_names, mylevels, factor_levels, neighb_title)
 
 ###  Distribution of answers for independent variables broken down by education
 
-Here below is a plot showing the education vs answers to independent variables questions, broken down by independent variables questions.
+Here below is a plot showing the education versus answers to the independent variables questions, broken down by the independent variables questions.
 
 ```{r fig.height = 7, fig.width = 10, fig.align = "center"}
 survey_df_e <- survey_df_e %>% 
@@ -2178,7 +2211,7 @@ tidy_survey_df_e %>%
   )
 ```
 
-For this plot, the education is coded as an integer value as shown in the following table (see the column "edu_num"). This table also shows the count for each level (under the column "n").
+For this plot, the education is coded as an integer value as shown in the following table (see the column `edu_num`). This table also shows the count for each level (under the column `n`).
 
 ```{r}
 options(scipen = 999, digits = 3)
@@ -2186,7 +2219,7 @@ options(scipen = 999, digits = 3)
 survey_df_e %>% 
   count(edu, edu_num) %>%
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = F, position = "left", font_size = 14)
 ```
 
@@ -2198,15 +2231,15 @@ meta <- data_frame(question = header_lookup$google_f_header[c(5:15, 29)],
 
 meta %>% 
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = T, font_size = 14)
 ```
 
-We can observe from this plot that there is a possible positive relationship between education and the extent to which respondants agreed with the statement "The local government is able to identify the projects that are most wanted by citizens.", although this should be confirmed with the statistical modeling that we will perform in the next chapter.
+We can observe from this plot that there is a possible positive relationship between education and the extent to which respondants agreed with the statement: **The local government is able to identify the projects that are most wanted by citizens**, although this should be confirmed by the statistical modeling that we will perform in the next chapter.
 
 ###  Distribution of answers for independent variables broken down by age
 
-Here below is a plot showing the mean age vs answers to independent variables questions, broken down by independent variables questions.
+Here below is a plot showing the mean age versus answers to the independent variables questions, broken down by the independent variables questions.
 
 ```{r fig.height = 7, fig.width = 10, fig.align = "center"}
 survey_df_e <- survey_df_e %>% 
@@ -2246,7 +2279,7 @@ tidy_survey_df_e %>%
   )
 ```
 
-For this plot, the age is coded as an integer value as shown in the following table (see the column "age_num"). This table also shows the count for each level (under the column "n").
+For this plot, the age group is coded as an integer value as shown in the following table (see the column `age_num`). This table also shows the count for each level (under the column `n`).
 
 ```{r}
 options(scipen = 999, digits = 3)
@@ -2254,7 +2287,7 @@ options(scipen = 999, digits = 3)
 survey_df_e %>% 
   count(age, age_num) %>%
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = F, position = "left", font_size = 14)
 ```
 
@@ -2272,12 +2305,12 @@ Here again, our dependent variable has more than two classes (three in this case
 
 #### Model 1
 
-In this section, we will fit a model with Interest (in joining a civic crowdfunding platform) as the target variable and all of the independent variables, as well as the control variables, as the explanatory variables.
+In this section and also in the next one, we will fit a model with Interest (in joining a civic crowdfunding platform) as the target variable and all of the independent variables, as well as the control variables, as the explanatory variables.
 
-In this model, we will split the Interest variable into the two following groups:
+For the first model, we will split the Interest variable into the two following groups:
 
 * Class 0: `Not_interested`;
-* Class 1: The rest of the possible classes (`Could_be_interested` and `Is_Ready`) combined.
+* Class 1: The rest of the possible classes combined (`Could_be_interested` and `Is_Ready`).
 
 Also, we filter out observations with gender other than `Female` and `Male`. Then, `Females` are represented by the integer value 1 and `Males` are represented by the integer value 2.
 
@@ -2307,7 +2340,7 @@ survey_df_e_mat <- survey_df_e %>%
 survey_df_e_mat %>% 
   head() %>% 
   kable() %>% 
-  kable_styling(bootstrap_options = c("striped","hover"),
+  kable_styling(bootstrap_options = c("striped", "hover"),
                 full_width = T, font_size = 14)
 ```
 
@@ -2348,12 +2381,38 @@ glm_e_2 <- glm(interest_binary ~ .,  family = "binomial",
 summary(glm_e_2)
 ```
 
-Again, the model did not converge. This is probably due to the fact that the number of observations for the entrepreneurs is too small overall to build a logistic regression model.
+Again, the model did not converge. This is maybe due to the fact that the sample size for the entrepreneurs is too small overall to be able to build a logistic regression model.
 
 # Conclusions
 
 It is now time to draw conclusions from this study.
 
-First, we should mention that it is not possible to generalize those conclusion to the population of interest, since the respondants were not sampled at random. Furthermore, the sample is biased, as evidenced by the over-representation of respondants with a masters degree for example.
+First, we should mention that it is not possible to generalize those conclusions to the population of interest, since the respondants were not sampled at random. Furthermore, the sample is biased, as evidenced by the over-representation of respondants with a masters degree.
 
-Blablabla
+Let us remind ourselves the hypotheses that we hoped to confirm with this study.
+
+* Hypotheses related to the entrepreneurs:
+    + H1: A more participative platform is positively correlated with the interest to join a civic crowdfunding platform.
+    + H2: A positive opinion on projects that are co-created by social entrepreneurs and the local government is positively correlated with the interest to join a civic crowdfunding platform.
+* Hypotheses related to the citizens:
+    + H3: The wish for more participation in debates on public issues is positively correlated with the interest to support citizens initiatives.
+    + H4: A positive opinion on projects that are co-created by social entrepreneurs and the local government through civic crowdfunding platforms is positively correlated with the interest to support citizens initiatives.
+
+Based on the observations we have made throughout this document, we can conclude the following:
+
+1. For the entrepreneurs (active members of a local citizens initiative, social project or social organization):
+    i) Unfortunately, the 'response rate' for the entrepreneurs was not sufficient for us to be able to fit a stistical model, thus we can only rely on summary statistics and vizualisations to draw conclusions here.
+    ii) We observed that most entrepreneurs recognize in general the need for face-to-face interactions, that citizens would like to participate in debates on local public issues, and they would welcome the possibility for citizens on a crowdfunding platform to express their disagreement about some aspects of the projects they contribute to financially.
+    iii) However, we cannot use those results to validate H1 since they could not be compared with the entrepreneurs's interest to join a civic crowdfunding platform.
+    iv) We also observed that entrepreneurs generally back the idea of civic crowdfunding platform playing a role of intermediary between citizens initiatives and the local authorities. This is an interesting insight, although once again this could not be correlated with the entrepreneurs's interest to join a civic crowdfunding platform, therefore it is not possible to validate H2.
+
+2. For the citizens:
+    i) We observed that most respondants think that it is difficult for citizens to find places where local public issues are collectively debated. Moreover, they seem to have a positive opinion about civic crowdfunding platforms, since there seems to be a consensus about the fact that the latter don't represent a threat to funding of services by the government.
+    ii) They generally agree with the entrepreneurs about the role of intermediary between citizens initiatives and the local authorities that civic crowdfunding platforms could play.
+    iii) Respondants who want to participate in debates on local public issues are more likely to be willing to fund or volunteer in a citizens initiative.
+    iv) It is those who reported to be only potentially interested to fund or volunteer in a citizen initiative (as opposed to those who reported to be ready to fund or volunteer) that reported the most enthousiasm regarding the role of intermediary between citizen initiatives and local authorities that civic crowdfunding platforms could play. Perhaps would they be ready to fund or volunteer once this role is fulfilled?
+    v) Similarly, respondants only potentially interested to fund or volunteer, in particular those willing to volunteer, were more likely to report that they would be more inclined to contribute financially if they had the possibility to express their disagreement on the projects they would support. Although, once again, we cannot draw causal inferences in this study, that makes a lot of sense.
+    vi) Respondants who agree that personally funding a citizens initiative is enough to satisfy their desire to engage in this project were more likely to be willing to fund rather than to volunteer. That is not such a surprising result after all.
+    vii) Respondants who reported that they would like to participate in debates on local public issues are more likely to be already investing in citizens initiatives than not investing at all. This is quite an interesting insight, which backs our hypothesis H3.
+    
+So, overall, although we are not claiming here that all of our hypotheses are verified, there are multiple indications that a civic crowdfunding platform such as BrusselsTogether would be more attractive to both citizens and entrepreneurs should it strive for being a truly participative platform as well as a communication channel, an intermediary between the initiatives and the local authorities.
