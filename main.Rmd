@@ -27,13 +27,15 @@ include_graphics("inputs/SolvayBS_logo.gif")
 
 # Summary 
 
-This aim of this document is to provide an analysis of survey data in the context of a the market research done by students at ULB/Sovay Brussels School on citizen initiatives and, in particular, civic crowdfunding. This research originated from a need by BrusselsTogether to better understand the various factors that could be associated with the success of their own civic crowdfunding platform.
+This aim of this document is to communicate an analysis of survey data in the context of a the market research done by students at ULB/Sovay Brussels School on citizen initiatives and, in particular, on civic crowdfunding platforms in the region of Brussels. This research originated from a need by BrusselsTogether to better understand the various factors that could be associated with the success of their own civic crowdfunding platform.
 
-The present document provides all of the associated code written in R programming language in order for anyone to be able to check and reproduce the findings presented here.
+The present document provides all of the associated code written in the R programming language in order for anyone to be able to check and reproduce the findings presented here.
 
 The online survey was launched in April 2018 by the students and was designed based on a qualitative research which was conducted beforehand.
 
-All of the input files, as well as the R code, can be retrieved on our [Github page](https://github.com/antoinemercier82/BrusselsTogether-Mkg-Analytics-Solvay-BS-2018).
+All of the input files, as well as the R code, can also be retrieved on our [Github page](https://github.com/antoinemercier82/BrusselsTogether-Mkg-Analytics-Solvay-BS-2018).
+
+In the survey, the first step was to split the respondants between two categories: citizens and 'entrepreneurs' (i.e. active members of a local citizens initiative, social project or social organization). Therefore, in this document we are going to analyze those two groups separately.
 
 # Data Preprocessing
 
@@ -78,7 +80,7 @@ header_lookup <- read_delim("inputs/header_lookup.txt", delim = ";")
 
 ### Preprocessing
 
-The preprocessing code (essentially cleaning and tidying of the data) is available below. The reader can have a look by clicking on the `Code` button on the right. We chose not to explicitely detail this process in order to preserve the clarity of this document.
+The preprocessing code (essentially cleaning and tidying of the data) is available below. If interested, the reader can have a look by clicking on the `Code` button on the right.
 
 ```{r message = FALSE, warning = FALSE}
 # Dates preprocessing
@@ -429,6 +431,9 @@ survey_df$lang <- factor(survey_df$lang,
                          levels = c("English", "Dutch", "French"))
 survey_df$ec_gender <- factor(survey_df$ec_gender,
                               levels = c("Female", "Male", "Other"))
+survey_df$grouping <- factor(survey_df$grouping,
+                         levels = c("Active_member", "Citizen_casual_vol", "Citizen_not_active"))
+
 
 # Split survey_df_e/survey_df_c
 
@@ -570,9 +575,55 @@ survey_df_j$resp_type <- factor(survey_df_j$resp_type,
 
 Now that we have imported, cleaned and tidied the data, we can start doing some exploratory analysis. In this document, we will often refer to Exploratory Data Analysis as the acronym EDA.
 
-Our sample frame (i.e. our population of interest) here is the whole population in the Brussels-Capital Region (therefore including all its 19 municipalities).
-
 Note that the respondants were given the possibility to fill the questionnaire in either English, Dutch or French.
+
+The survey was aimed at both social entrepreneurs and citizens of Brussels but each group is associated with a distinct set of hypotheses that we would like to investigate. Therefore, the first question in the survey was discriminating so that the rest of the questionnaire was split into two branches.
+
+The discriminating question is shown in the table below along with the possible choices and the related categories in the R code.
+
+```{r}
+x <- list(q = names(lut_group_eng)[c(2, 3, 1)], v = levels(survey_df$grouping)) %>% as_data_frame()
+colnames(x) <- c(header_lookup$google_f_header[3], "Category in R code")
+x %>% 
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover"),
+                full_width = F, position = "left", font_size = 14)
+```
+
+Let's have a look at the balance between each group:
+
+```{r fig.height = 2.9, fig.width = 10, fig.align = "center"}
+survey_df %>%
+  count(grouping) %>%
+  rename(grouping_count = n) %>%
+  mutate(grouping = reorder(grouping, grouping_count)) %>%
+  ggplot(aes(x = grouping, y = grouping_count)) +
+  geom_col(fill = "#1C9099", alpha = 0.8) +
+  theme_ipsum_rc(grid = "X") +
+  scale_fill_ipsum() +
+  coord_flip() +
+  labs(title = "Distribution of responses to discriminating question", x = "") +
+  theme(plot.title = element_text(size = 14, hjust = 0.5)) +
+  theme(axis.text.y = element_text(hjust = 0)) +
+  theme(plot.margin = unit(c(1,1,1,0), "cm"))
+
+```
+
+```{r}
+options(scipen = 999, digits = 2)
+
+survey_df %>% 
+  count(grouping) %>% 
+  mutate(total = sum(n),
+         percent = n / total) %>% 
+  select(grouping, n, percent) %>% 
+  arrange(desc(n)) %>% 
+  kable() %>%
+  kable_styling(bootstrap_options = c("striped", "hover"),
+                full_width = F, position = "left", font_size = 14)
+```
+
+Then we split the respondants into two group: first the citizens, including those with no active implication in a local citizen's initiative as well as those with casual volonteering, and second, the entrepreneurs (the active members of a local citizen's initiative). 
 
 ### Control variables
 
@@ -684,6 +735,8 @@ addmargins(table(survey_df_e$age, survey_df_e$loc) %>%
 ```
 
 ### Dependent and independent variables
+
+Our population of interest in this chapter on citizens is the whole population in the Brussels-Capital Region (therefore including all its 19 municipalities).
 
 Concerning the citizens, the objective of this survey is to test two hypotheses that were derived from our qualitative research:
 
@@ -2416,3 +2469,4 @@ Based on the observations we have made throughout this document, we can conclude
     vii) Respondants who reported that they would like to participate in debates on local public issues are more likely to be already investing in citizens initiatives than not investing at all. This is quite an interesting insight, which backs our hypothesis H3.
     
 So, overall, although we are not claiming here that all of our hypotheses are verified, there are multiple indications that a civic crowdfunding platform such as BrusselsTogether would be more attractive to both citizens and entrepreneurs should it strive for being a truly participative platform as well as a communication channel, an intermediary between the initiatives and the local authorities.
+
