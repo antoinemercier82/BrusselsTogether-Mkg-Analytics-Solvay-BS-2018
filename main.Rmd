@@ -35,7 +35,7 @@ The online survey was launched in April 2018 by the students and was designed ba
 
 All of the input files, as well as the R code, can also be retrieved on our [Github page](https://github.com/antoinemercier82/BrusselsTogether-Mkg-Analytics-Solvay-BS-2018).
 
-In the survey, the first step was to split the respondants between two categories: citizens and 'entrepreneurs' (i.e. active members of a local citizens initiative, social project or social organization). Therefore, in this document we are going to analyze those two groups separately.
+In the survey, the first step was to split the respondents between two categories: citizens and 'entrepreneurs' (i.e. active members of a local citizens initiative, social project or social organization). Therefore, in this document we are going to analyze those two groups separately.
 
 # Data Preprocessing
 
@@ -575,7 +575,7 @@ survey_df_j$resp_type <- factor(survey_df_j$resp_type,
 
 Now that we have imported, cleaned and tidied the data, we can start doing some exploratory analysis. In this document, we will often refer to Exploratory Data Analysis as the acronym EDA.
 
-Note that the respondants were given the possibility to fill the questionnaire in either English, Dutch or French.
+Note that the respondents were given the possibility to fill the questionnaire in either English, Dutch or French.
 
 The survey was aimed at both social entrepreneurs and citizens of Brussels but each group is associated with a distinct set of hypotheses that we would like to investigate. Therefore, the first question in the survey was discriminating so that the rest of the questionnaire was split into two branches.
 
@@ -623,7 +623,7 @@ survey_df %>%
                 full_width = F, position = "left", font_size = 14)
 ```
 
-Then we split the respondants into two group: first the citizens, including those with no active implication in a local citizen's initiative as well as those with casual volonteering, and second, the entrepreneurs (the active members of a local citizen's initiative). 
+Then we split the respondents into two group: first the citizens, including those with no active implication in a local citizen's initiative as well as those with casual volonteering, and second, the entrepreneurs (the active members of a local citizen's initiative). 
 
 ### Control variables
 
@@ -631,7 +631,7 @@ In the survey, we asked several questions that can be referred to as control var
 
 The next few plots will decribe our sample in terms of those variables.
 
-First, we can create a bar plot showing the count of respondants, broken down into citizens/entrepreneurs, gender and language:
+First, we can create a bar plot showing the count of respondents, broken down into citizens/entrepreneurs, gender and language:
 
 ```{r fig.height = 6, fig.width = 10, fig.align = "center"}
 my_cols <- brewer.pal(3, "Paired")
@@ -640,7 +640,7 @@ survey_df_j %>%
   ggplot(aes(x = gender, fill = language)) +
   geom_bar(alpha = 0.8) +
   facet_wrap(~ resp_type) +
-  labs(title = "Composition of respondants") +
+  labs(title = "Composition of respondents") +
   theme_ipsum_rc() +
   scale_fill_manual(values = my_cols) +
   theme(panel.grid.major.x = element_blank(),
@@ -666,7 +666,7 @@ addmargins(table(survey_df_e$language, survey_df_e$gender) %>%
 
 As we can see, the sample size for the entrepreneurs is 39 observations, and the sample size for the citizens is 152 observations.
 
-Let's now break the count of respondants by location and education.
+Let's now break the count of respondents by location and education.
 
 ```{r fig.height = 6, fig.width = 10, fig.align = "center"}
 my_cols <- brewer.pal(9, "BuPu")
@@ -675,7 +675,7 @@ survey_df_j %>%
   ggplot(aes(x = loc, fill = edu)) +
   geom_bar(alpha = 0.8) +
   facet_wrap(~ resp_type) +
-  labs(title = "Composition of respondants") +
+  labs(title = "Composition of respondents") +
   theme_ipsum_rc() +
   scale_fill_manual(values = my_cols[2:7]) +
   theme(panel.grid.major.x = element_blank(),
@@ -699,9 +699,9 @@ addmargins(table(survey_df_e$edu, survey_df_e$loc) %>%
 
 ```
 
-We can observe that there is a disproportionate share of respondants with a masters degree among both entrepreneurs and citizens. Therefore, the samples are very likely to be biased.
+We can observe that there is a disproportionate share of respondents with a masters degree among both entrepreneurs and citizens. Therefore, the samples are very likely to be biased.
 
-Finally, we can break the count of respondants by location and age:
+Finally, we can break the count of respondents by location and age:
 
 ```{r fig.height = 6, fig.width = 10, fig.align = "center"}
 my_cols <- brewer.pal(9, "YlGnBu")
@@ -710,7 +710,7 @@ survey_df_j %>%
   ggplot(aes(x = loc, fill = age)) +
   geom_bar(alpha = 0.8) +
   facet_wrap(~ resp_type) +
-  labs(title = "Composition of respondants") +
+  labs(title = "Composition of respondents") +
   theme_ipsum_rc() +
   scale_fill_manual(values = my_cols[3:9]) +
   theme(panel.grid.major.x = element_blank(),
@@ -793,7 +793,7 @@ For each of the two independent variables, we asked a set of questions which, in
 
 The table below displays the items and their related variable name in the R code. The items related to the need for more participation in debates on public issues are `p1` to `p5` and the items related to opinion on projects that are co-created by social entrepreneurs and the local government through civic crowdfunding platforms are `g1` to `g6`.
 
-Additionnaly, we asked the respondants whether their interest in contributing to the future of their neighborhood had increased in the past several years (variable name `neighb`).
+Additionnaly, we asked the respondents whether their interest in contributing to the future of their neighborhood had increased in the past several years (variable name `neighb`).
 
 All of those items were measured on a 5-points Likert scale, from `Strongly_disagree` to `Strongly_agree`.
 
@@ -929,7 +929,7 @@ c_p_title <- "\n\nCitizens - Participative questions\n"
 lik_plot(t_c_p, my_df_names_c_p, mylevels_c_p, factor_levels_c_p, c_p_title)
 ```
 
-We can observe from this plot that the responses to some of the questions are polarized. Overall, it seems that most of the respondants disagree with the statement: **It is relatively easy for citizens to find places where local public issues are collectively debated**.
+We can observe from this plot that the responses to some of the questions are polarized. Overall, it seems that most of the respondents disagree with the statement: **It is relatively easy for citizens to find places where local public issues are collectively debated**.
 
 ```{r fig.height = 5.5, fig.width = 10, fig.align = "center"}
 my_df_names_c_g <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
@@ -960,8 +960,8 @@ lik_plot(t_c_g, my_df_names_c_g, mylevels_c_g, factor_levels_c_g, c_g_title)
 
 Here again, we can observe from this plot that the responses to some of the questions are quite polarized:
 
-* Overall, it seems that most of the respondants disagree with the statement: **Civic crowdfunding represents a direct threat to public funding of services**;
-* Quite interestingly for the purposes of our research, it seems that most of the respondants agree with the statement: **Civic crowdfunding platforms could play a role of intermediary between citizen's initiatives and the local government**.
+* Overall, it seems that most of the respondents disagree with the statement: **Civic crowdfunding represents a direct threat to public funding of services**;
+* Quite interestingly for the purposes of our research, it seems that most of the respondents agree with the statement: **Civic crowdfunding platforms could play a role of intermediary between citizen's initiatives and the local government**.
 
 ```{r fig.height = 2.7, fig.width = 10, fig.align = "center"}
 questions_neighb <- header_lookup$google_f_header[29]
@@ -992,7 +992,7 @@ lik_plot(t_c_neighb, my_df_names_c_neighb, mylevels_c_neighb, factor_levels_c_ne
 ```
 
 
-Finally, we asked how much the respondants were already investing in citizens initiatives. This could be regarded as a secondary dependent variable capturing the interest in citizens initiatives.
+Finally, we asked how much the respondents were already investing in citizens initiatives. This could be regarded as a secondary dependent variable capturing the interest in citizens initiatives.
 
 Note that this feature was added a bit later after having launched the online survey, so the first few observations do not contain information for this question.
 
@@ -1341,7 +1341,7 @@ meta %>%
                 full_width = T, font_size = 14)
 ```
 
-We can observe from this plot that there is a possible positive relationship between education and the extent to which respondants agreed with the statement: **Personally funding a citizen’s initiative is enough to satisfy my desire to engage in this project**, although this should be confirmed/quantified by the statistical modeling that we will perform in the next chapter.
+We can observe from this plot that there is a possible positive relationship between education and the extent to which respondents agreed with the statement: **Personally funding a citizen’s initiative is enough to satisfy my desire to engage in this project**, although this should be confirmed/quantified by the statistical modeling that we will perform in the next chapter.
 
 ###  Distribution of answers for independent variables broken down by age
 
@@ -1421,7 +1421,7 @@ Also, we filter out observations with gender other than `Female` and `Male`. The
 
 Answers to Likert scale questions range from 1 (`Strongly_disagree`) to 5 (`Strongly agree`).
 
-Answers to the question about the age of the respondant range from 1 (`Under_14`) to 9 (`75_plus`).
+Answers to the question about the age of the respondent range from 1 (`Under_14`) to 9 (`75_plus`).
 
 Answers to the education question range from 1 (`Primary_or_None`) to 6 (`PhD`).
 
@@ -1661,11 +1661,11 @@ This confirms visually the positive relationship identified in point 2.
 
 #### Model 4
 
-In our last model, we are going to change our target variable. Instead of modeling the interest in citizens initiatives explained by all of the other variables, we will be modeling the respondants' past investment in citizens initiatives explained by all of the other variables (independent variables and control variables).
+In our last model, we are going to change our target variable. Instead of modeling the interest in citizens initiatives explained by all of the other variables, we will be modeling the respondents' past investment in citizens initiatives explained by all of the other variables (independent variables and control variables).
 
 In order for this target to be binary, we will split the observations into the two following groups, related to the `invest` variable:
 
-* Class 0: `0`, that is, the respondant did not report already investing in citizens initiatives;
+* Class 0: `0`, that is, the respondent did not report already investing in citizens initiatives;
 * Class 1: All of the other choices (`1_99`, `100_199`, `200_499`, `500_plus`).
 
 All of the other settings are the same as for the model 1.
@@ -1998,7 +1998,7 @@ For each of the two independent variables, we asked a set of questions which, in
 
 The table below displays the items along with their related variable name in the R code. The items related to the appeal of a more participative platform are `p1` to `p5` and the items related to the opinion on projects that are co-created by social entrepreneurs and the local government through civic crowdfunding platforms are `g1` to `g6`.
 
-Additionnaly, we asked the respondants whether their interest in contributing to the future of their neighborhood had increased in the past several years (variable name `neighb`).
+Additionnaly, we asked the respondents whether their interest in contributing to the future of their neighborhood had increased in the past several years (variable name `neighb`).
 
 All of those items were measured on a 5-points Likert scale, from `Strongly_disagree` to `Strongly_agree`.
 
@@ -2048,10 +2048,10 @@ lik_plot(t_e_p, my_df_names_e_p, mylevels_e_p, factor_levels_e_p, e_p_title)
 
 We can observe from this plot that the responses to most questions are polarized. In particular:
 
-* It seems that most of the respondants agree with the statement: **Face-to-face interactions are necessary for collective action.**
-* It seems that most of the respondants agree with the statement: **Citizens would like to participate in debates on local public issues that they care about.**
-* It seems that most of the respondants disagree with the statement: **It is relatively easy for citizens to find places where local public issues are collectively debated.**
-* It seems that most of the respondants agree with the statement: **I would welcome the possibility for citizens on a crowdfunding platform to express their disagreement about some aspects of the projects they contribute to financially.**
+* It seems that most of the respondents agree with the statement: **Face-to-face interactions are necessary for collective action.**
+* It seems that most of the respondents agree with the statement: **Citizens would like to participate in debates on local public issues that they care about.**
+* It seems that most of the respondents disagree with the statement: **It is relatively easy for citizens to find places where local public issues are collectively debated.**
+* It seems that most of the respondents agree with the statement: **I would welcome the possibility for citizens on a crowdfunding platform to express their disagreement about some aspects of the projects they contribute to financially.**
 
 ```{r fig.height = 5.5, fig.width = 10, fig.align = "center"}
 my_df_names_e_g <- c("interest", "Strongly disagree", "Disagree", "Neither agree nor disagree",
@@ -2082,8 +2082,8 @@ lik_plot(t_e_g, my_df_names_e_g, mylevels_e_g, factor_levels_e_g, e_g_title)
 
 Once again, we can observe from this plot that the responses to some questions are polarized. In particular:
 
-* It seems that most of the respondants disagree with the statement: **Civic crowdfunding represents a direct threat to the funding of public goods and services by the local government.**
-* Quite interestingly for the validation of the hypothese H2, it seems that most of the respondants agree with the statement: **Civic crowdfunding platforms could play a role of intermediary between citizen’s initiatives and the local government.**
+* It seems that most of the respondents disagree with the statement: **Civic crowdfunding represents a direct threat to the funding of public goods and services by the local government.**
+* Quite interestingly for the validation of the hypothese H2, it seems that most of the respondents agree with the statement: **Civic crowdfunding platforms could play a role of intermediary between citizen’s initiatives and the local government.**
 
 ```{r fig.height = 2.7, fig.width = 10, fig.align = "center"}
 questions_neighb <- header_lookup$google_f_header[29]
@@ -2288,7 +2288,7 @@ meta %>%
                 full_width = T, font_size = 14)
 ```
 
-We can observe from this plot that there is a possible positive relationship between education and the extent to which respondants agreed with the statement: **The local government is able to identify the projects that are most wanted by citizens**, although this should be confirmed by the statistical modeling that we will perform in the next chapter.
+We can observe from this plot that there is a possible positive relationship between education and the extent to which respondents agreed with the statement: **The local government is able to identify the projects that are most wanted by citizens**, although this should be confirmed by the statistical modeling that we will perform in the next chapter.
 
 ###  Distribution of answers for independent variables broken down by age
 
@@ -2371,7 +2371,7 @@ Answers to Likert scale questions range from 1 (`Strongly_disagree`) to 5 (`Stro
 
 Answers to Likert scale questions range from 1 (`Strongly_disagree`) to 5 (`Strongly agree`).
 
-Answers to the question about the age of the respondant range from 1 (`Under_14`) to 9 (`75_plus`).
+Answers to the question about the age of the respondent range from 1 (`Under_14`) to 9 (`75_plus`).
 
 Answers to the education question range from 1 (`Primary_or_None`) to 6 (`PhD`).
 
@@ -2440,7 +2440,7 @@ Again, the model did not converge. This is maybe due to the fact that the sample
 
 It is now time to draw conclusions from this study.
 
-First, we should mention that it is not possible to generalize those conclusions to the population of interest, since the respondants were not sampled at random. Furthermore, the sample is biased, as evidenced by the over-representation of respondants with a masters degree.
+First, we should mention that it is not possible to generalize those conclusions to the population of interest, since the respondents were not sampled at random. Furthermore, the sample is biased, as evidenced by the over-representation of respondents with a masters degree.
 
 Let us remind ourselves the hypotheses that we hoped to confirm with this study.
 
@@ -2454,19 +2454,19 @@ Let us remind ourselves the hypotheses that we hoped to confirm with this study.
 Based on the observations we have made throughout this document, we can conclude the following:
 
 1. For the entrepreneurs (active members of a local citizens initiative, social project or social organization):
-    i) Unfortunately, the 'response rate' for the entrepreneurs was not sufficient for us to be able to fit a stistical model, thus we can only rely on summary statistics and vizualisations to draw conclusions here.
-    ii) We observed that most entrepreneurs recognize in general the need for face-to-face interactions, that citizens would like to participate in debates on local public issues, and they would welcome the possibility for citizens on a crowdfunding platform to express their disagreement about some aspects of the projects they contribute to financially.
-    iii) However, we cannot use those results to validate H1 since they could not be compared with the entrepreneurs's interest to join a civic crowdfunding platform.
-    iv) We also observed that entrepreneurs generally back the idea of civic crowdfunding platform playing a role of intermediary between citizens initiatives and the local authorities. This is an interesting insight, although once again this could not be correlated with the entrepreneurs's interest to join a civic crowdfunding platform, therefore it is not possible to validate H2.
+    i) Unfortunately, the 'response rate' for the entrepreneurs was not sufficient for us to be able to fit a statistical model, thus we can only rely on summary statistics and visualizations to draw conclusions here.
+    ii) We observed that most entrepreneurs recognize in general the need for face-to-face interactions, most of them think that citizens would like to participate in debates on local public issues, and they would welcome the possibility for citizens on a crowdfunding platform to express their disagreement about some aspects of the projects they contribute to financially.
+    iii) However, we cannot use those results to validate H1 since they could not be compared with the entrepreneurs' interest to join a civic crowdfunding platform.
+    iv) We also observed that entrepreneurs generally back the idea of civic crowdfunding platform playing a role of intermediary between citizens initiatives and the local authorities. This is an interesting insight, although once again this could not be correlated with the entrepreneurs' interest to join a civic crowdfunding platform, therefore it is not possible to validate H2.
 
 2. For the citizens:
-    i) We observed that most respondants think that it is difficult for citizens to find places where local public issues are collectively debated. Moreover, they seem to have a positive opinion about civic crowdfunding platforms, since there seems to be a consensus about the fact that the latter don't represent a threat to funding of services by the government.
+    i) We observed that most respondents think that it is difficult for citizens to find places where local public issues are collectively debated. Moreover, they seem to have a positive opinion about civic crowdfunding platforms, since there seems to be a consensus about the fact that the latter don't represent a threat to funding of services by the government.
     ii) They generally agree with the entrepreneurs about the role of intermediary between citizens initiatives and the local authorities that civic crowdfunding platforms could play.
-    iii) Respondants who want to participate in debates on local public issues are more likely to be willing to fund or volunteer in a citizens initiative.
-    iv) It is those who reported to be only potentially interested to fund or volunteer in a citizen initiative (as opposed to those who reported to be ready to fund or volunteer) that reported the most enthousiasm regarding the role of intermediary between citizen initiatives and local authorities that civic crowdfunding platforms could play. Perhaps would they be ready to fund or volunteer once this role is fulfilled?
-    v) Similarly, respondants only potentially interested to fund or volunteer, in particular those willing to volunteer, were more likely to report that they would be more inclined to contribute financially if they had the possibility to express their disagreement on the projects they would support. Although, once again, we cannot draw causal inferences in this study, that makes a lot of sense.
-    vi) Respondants who agree that personally funding a citizens initiative is enough to satisfy their desire to engage in this project were more likely to be willing to fund rather than to volunteer. That is not such a surprising result after all.
-    vii) Respondants who reported that they would like to participate in debates on local public issues are more likely to be already investing in citizens initiatives than not investing at all. This is quite an interesting insight, which backs our hypothesis H3.
+    iii) Respondents who want to participate in debates on local public issues are more likely to be willing to fund or volunteer in a citizens initiative.
+    iv) It is those who reported to be only potentially interested to fund or volunteer in a citizen initiative (as opposed to those who reported to be ready to fund or volunteer) that reported the most enthusiasm regarding the role of intermediary between citizen initiatives and local authorities that civic crowdfunding platforms could play. Perhaps would they be ready to fund or volunteer once this role is fulfilled?
+    v) Similarly, respondents only potentially interested to fund or volunteer, in particular those willing to volunteer, were more likely to report that they would be more inclined to contribute financially if they had the possibility to express their disagreement on the projects they would support. Although, once again, we cannot draw causal inferences in this study, that makes a lot of sense.
+    vi) Respondents who agree that personally funding a citizens initiative is enough to satisfy their desire to engage in this project were more likely to be willing to fund rather than to volunteer. That is not such a surprising result after all.
+    vii) Respondents who reported that they would like to participate in debates on local public issues are more likely to be already investing in citizens initiatives than not investing at all. This is quite an interesting insight, which backs our hypothesis H3.
     
 So, overall, although we are not claiming here that all of our hypotheses are verified, there are multiple indications that a civic crowdfunding platform such as BrusselsTogether would be more attractive to both citizens and entrepreneurs should it strive for being a truly participative platform as well as a communication channel, an intermediary between the initiatives and the local authorities.
 
